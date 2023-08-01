@@ -5,22 +5,22 @@ import { CustomRepository } from 'src/typeorm-ex.decorator';
 
 @CustomRepository(UserObject)
 export class UserObjectRepository extends Repository<UserObject> {
-  async createUser(createUsersDto: CreateUsersDto): Promise<string> {
-    const { intra } = createUsersDto;
+  async createUser(createUsersDto: CreateUsersDto): Promise<UserObject> {
+    const { intra, nickname, imgUri } = createUsersDto;
 
-    const user = this.create({
+    let user = this.create({
       intra: intra,
-      nickname: intra,
+      nickname: nickname,
+      img: imgUri,
       rankpoint: 0,
       isOnline: true,
       available: true,
       win: 0,
       lose: 0,
     });
+    user = await this.save(user);
 
-    await this.save(user);
-
-    return user.intra;
+    return user;
   }
 }
 

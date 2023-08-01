@@ -6,6 +6,7 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
   OneToMany,
+  PrimaryColumn,
 } from 'typeorm';
 import { FriendList } from './friendList.entity';
 import { BlockList } from './blockList.entity';
@@ -25,7 +26,7 @@ export enum ResultType {
 
 @Entity('users')
 export class UserObject extends BaseEntity {
-  @PrimaryGeneratedColumn()
+  @PrimaryColumn()
   userIdx: number;
 
   @Column()
@@ -33,6 +34,9 @@ export class UserObject extends BaseEntity {
 
   @Column()
   nickname: string;
+
+  @Column()
+  img: string;
 
   @Column()
   rankpoint: number;

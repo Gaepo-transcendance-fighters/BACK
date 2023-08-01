@@ -13,4 +13,6 @@ export class CreateUsersDto {
   @MinLength(1)
   @Matches(/^[a-zA-Z0-9]*$/, { message: 'intra is unique' })
   intra: string;
+  nickname: string;
+  imgUri: string;
 }

@@ -10,17 +10,19 @@ export class CertificateRepository extends Repository<CertificateObject> {
     tokenDto: CreateCertificateDto,
     user: UserObject,
     oauth2nd: boolean,
-  ): Promise<boolean> {
+    email: string,
+  ){
     const { token } = tokenDto;
 
     const certificate = this.create({
       token: token,
       userIdx: user.userIdx,
       check2Auth: oauth2nd,
+      email: email,
     });
 
-    await this.save(certificate);
+    const auth = await this.save(certificate);
 
-    return true;
+    return auth;
   }
 }
