@@ -1,0 +1,16 @@
+import { Module, forwardRef } from '@nestjs/common';
+import { UsersModule } from 'src/users/users.module';
+import { AuthService } from './auth.service';
+import { UsersService } from 'src/users/users.service';
+import { HttpModule } from '@nestjs/axios';
+// import { FtStrategy } from './auth.strategy';
+
+@Module({
+  imports: [
+    forwardRef(() => UsersModule),
+    HttpModule,
+  ],
+  providers: [AuthService],
+  exports: [AuthService],
+})
+export class AuthModule {}

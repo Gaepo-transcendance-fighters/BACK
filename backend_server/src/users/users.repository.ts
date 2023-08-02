@@ -22,6 +22,11 @@ export class UserObjectRepository extends Repository<UserObject> {
 
     return user;
   }
+
+  async findUserByIntra(intra: string): Promise<UserObject> {
+    const user = await this.findOne({ where: { intra: intra } });
+    return user;
+  }
 }
 
 // @CustomRepository(Histories)

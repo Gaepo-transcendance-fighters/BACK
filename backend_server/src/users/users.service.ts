@@ -57,6 +57,10 @@ export class UsersService {
     );
   }
 
+  async findUserByIntra(intra: string): Promise<UserObject> {
+    return this.userObjectRepository.findOne({ where: { intra: intra } });
+  }
+
   async addFriend(
     insertFriendDto: InsertFriendDto,
     user: UserObject,

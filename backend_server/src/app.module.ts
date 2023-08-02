@@ -8,7 +8,11 @@ import { typeORMConfig } from './configs/typeorm.config';
 import { GameModule } from './game/game.module';
 
 @Module({
-  imports: [TypeOrmModule.forRoot(typeORMConfig), ChatModule, UsersModule, GameModule],
+  imports: [TypeOrmModule.forRoot(typeORMConfig),
+    ChatModule,
+    UsersModule,
+    GameModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

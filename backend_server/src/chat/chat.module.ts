@@ -1,4 +1,4 @@
-import { Logger, Module } from '@nestjs/common';
+import { Logger, Module, forwardRef } from '@nestjs/common';
 import { ChatService } from './chat.service';
 import { ChatGateway } from './chat.gateway';
 import { Chat } from './class/chat.class';
@@ -13,11 +13,11 @@ import { UsersService } from 'src/users/users.service';
 @Module({
   // TODO: Member 와 관련된 것을 추가해야함
   imports: [
+    forwardRef(() => UsersModule),
     TypeOrmExModule.forCustomRepository([
       DMChannelRepository,
       DirectMessageRepository,
     ]),
-    UsersModule,
   ],
   providers: [ChatGateway, ChatService, Chat], // FIXME: Channel 은 어차피 Chat 으로 접근할거니까 필요 없겠지?
 })
