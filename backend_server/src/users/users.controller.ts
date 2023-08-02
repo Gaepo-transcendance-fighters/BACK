@@ -44,21 +44,19 @@ export class UsersController {
   //   return this.usersService.signIn(createUsersDto);
   // }
   
-  @Get('auth')
-  @Redirect(
-    `https://api.intra.42.fr/oauth/authorize?client_id=${CLIENT_ID}&redirect_uri=${redirectUri}&response_type=code`,
-    302,
-  )
-  loginOauth() {
+  
+  @Post('auth')
+  loginOauth(@Res() res: Response, ) {
     this.logger.log('loginOauth');
-    
+    return res.redirect(301, `http://localhost:4000/login/auth`); 
   }
 
-  // description: '42 login 후 전달 받은 code'
+  description: '42 login 후 전달 받은 code'
   
-  @Get('auth/login')
-  async codeCallback(@Res() res: Response, @Query('code') query): Promise<void> {
+  @Get('login/auth')
+  async codeCallback(@Res() res: Response, @Query('code') query: string): Promise<void> {
     this.logger.log('codeCallback');
+    this.logger.log('query check: ',query);
     const intraInfo = await this.authService.getIntraInfo(query);
     const payload = await this.authService.getTokenInfo(intraInfo);
     res.cookie('token', this.authService.issueToken(payload));

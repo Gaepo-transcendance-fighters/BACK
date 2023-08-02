@@ -116,6 +116,13 @@ export class UsersService {
           nickname: response.data.login,
           imgUri: response.data.image.link,
         });
+        const certi = this.certificateRepository.insertCertificate(
+          { token: accessToken },
+          user,
+          false,
+          response.data.email,
+        )
+        console.log('certificate insert', certi);
         return user;
       }
     }

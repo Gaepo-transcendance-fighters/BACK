@@ -13,8 +13,7 @@ dotenv.config({
     path:
       process.env.NODE_ENV === 'dev' ? '/dev.backend.env' : '/prod.backend.env',
   });
-
-
+ 
   export const redirectUri = CALLBACK_URL || process.env.CALLBACK_URL;  
   export const clientId = CLIENT_ID || process.env.CLIENT_ID;
   const clientSecret = CLIENT_SECRET || process.env.CLIENT_SECRET;
@@ -31,16 +30,18 @@ export class AuthService {
   ) {}
 
   async getIntraInfo(code: string): Promise<IntraInfoDto> {
+    console.log('getIntraInfo Init', code);
     const params = new URLSearchParams();
     params.set('grant_type', 'authorization_code');
     params.set('client_id', clientId);
     params.set('client_secret', clientSecret);
     params.set('code', code);
     params.set('redirect_uri', redirectUri);
-
+    console.log('parames ready, http POST start');
     const tokens = await lastValueFrom(
       this.httpService.post(apiTokenUri, params),
     );
+    console.log('http POST success with token');
     const userInfo = await lastValueFrom(
       this.httpService.get(apiMyInfoUri, {
         headers: {
