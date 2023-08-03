@@ -11,10 +11,10 @@ export class FtStrategy extends PassportStrategy(Strategy, 'ft') {
       clientSecret: CLIENT_SECRET || process.env.CLIENT_SECRET,
       callbackURL: 'http://localhost:4000/auth/login' || process.env.CALLBACK_URL,
       profileFields: {
-        id: 'id',
-        username: 'login',
+        userIdx: 'id',
+        intra: 'login',
         email: 'email',
-        image: 'image.link',
+        imgUri: 'image.link',
       },
       scope: ['public'],
     });
@@ -25,12 +25,12 @@ export class FtStrategy extends PassportStrategy(Strategy, 'ft') {
     profile: any,
     done: any,
   ): Promise<any> {
-    const { id, username, email, image } = profile;
+    const { userIdx, intra, email, imgUri } = profile;
     const user = {
-      id,
-      username,
+      userIdx,
+      intra,
       email,
-      image,
+      imgUri,
       accessToken,
       refreshToken,
     };

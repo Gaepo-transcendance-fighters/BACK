@@ -7,7 +7,7 @@ import { BlockListRepository } from './blockList.repository';
 import { FriendListRepository } from './friendList.repository';
 import { CertificateRepository } from './certificate.repository';
 import { HttpModule } from '@nestjs/axios';
-import { JwtModule } from '@nestjs/jwt';
+// import { JwtModule } from '@nestjs/jwt';
 import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
@@ -19,7 +19,7 @@ import { AuthModule } from 'src/auth/auth.module';
       CertificateRepository,
     ]),
     HttpModule,
-    JwtModule,
+    // JwtModule,
     forwardRef(() => AuthModule),
   ],
   controllers: [UsersController],

@@ -2,8 +2,8 @@ import { HttpService } from "@nestjs/axios";
 import { Injectable } from "@nestjs/common";
 import { lastValueFrom } from 'rxjs';
 import * as dotenv from 'dotenv';
-import * as jwt from 'jsonwebtoken';
-import { IntraInfoDto, JwtPayloadDto } from "./dto/auth.dto";
+// import * as jwt from 'jsonwebtoken';
+import { IntraInfoDto } from "./dto/auth.dto";
 import { UserObject } from "src/users/entities/users.entity";
 import { UsersService } from "src/users/users.service";
 import { CreateUsersDto } from "src/users/dto/create-users.dto";
@@ -13,8 +13,6 @@ dotenv.config({
     path:
       process.env.NODE_ENV === 'dev' ? '/dev.backend.env' : '/prod.backend.env',
   });
-  
-
 //   export const redirectUri = CALLBACK_URL || process.env.CALLBACK_URL;  
   export const clientId = CLIENT_ID || process.env.CLIENT_ID;
   const clientSecret = CLIENT_SECRET || process.env.CLIENT_SECRET;
@@ -59,23 +57,23 @@ export class AuthService {
       imgUri: userInfo.data.image.versions.small,
     };
   }
-  async getTokenInfo(intraInfo: IntraInfoDto): Promise<JwtPayloadDto> {
-    const { intra, imgUri } = intraInfo;
-    let user: UserObject | CreateUsersDto = await this.userService.findUserByIntra(intra);
-    if (user == null) {
+  // async getTokenInfo(intraInfo: IntraInfoDto): Promise<JwtPayloadDto> {
+  //   const { intra, imgUri } = intraInfo;
+  //   let user: UserObject | CreateUsersDto = await this.userService.findUserByIntra(intra);
+  //   if (user == null) {
       
-      const newUser: CreateUsersDto = {
-        intra: intra,
-        nickname: intra,
-        imgUri: imgUri,
-      };
-      this.userService.createUser(newUser);
-    //   await this.downloadProfileImg(intraInfo);
+  //     const newUser: CreateUsersDto = {
+  //       intra: intra,
+  //       nickname: intra,
+  //       imgUri: imgUri,
+  //     };
+  //     this.userService.createUser(newUser);
+  //   //   await this.downloadProfileImg(intraInfo);
      
-    }
-    return { id: user.userIdx, check2Auth: false };
-  }
-  issueToken(payload: JwtPayloadDto) {
-    return jwt.sign(payload, jwtSecret);
-  }
+  //   }
+  //   return { id: user.userIdx, check2Auth: false };
+  // }
+  // issueToken(payload: JwtPayloadDto) {
+  //   return jwt.sign(payload, jwtSecret);
+  // }
 }

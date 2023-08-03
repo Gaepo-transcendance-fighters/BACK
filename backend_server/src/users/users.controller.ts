@@ -19,6 +19,7 @@ import { UsersService } from './users.service';
 import { CreateUsersDto } from './dto/create-users.dto';
 import { AuthService, CLIENT_ID, redirectUri } from 'src/auth/auth.service';
 import { AuthGuard } from '@nestjs/passport';
+import { plainToClass } from 'class-transformer';
 
 
 @Controller()
@@ -72,7 +73,7 @@ export class UsersController {
 
   @Get('auth/42')
   @UseGuards(AuthGuard('ft'))
-  ftLogin(@Res() res) {
+  ftLogin() {
     /*
     res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
@@ -83,8 +84,20 @@ export class UsersController {
 
   @Get('auth/login')
   @UseGuards(AuthGuard('ft'))
-  getUser(@Req() req) {
+  async getUser(@Req() req, @Res() res: Response) {
     console.log('getUser', req.user);
-    return req.user;
+    const user = req.user;
+    user.userIdx = req.user.userIdx;
+    user.nickname = req.user.intra;
+    // const { userIdx, username, email, image} = user;
+    // const dto = new CreateUsersDto(id, username, username, image );
+    const userDto = plainToClass(CreateUsersDto, user);
+    console.log('userDto', userDto);
+    
+    const createdUser = await this.usersService.createUser(userDto)
+    
+    // const credential  = await this.authService.issueToken(createdUser); 
+    console.log('createdUser', createdUser);
+    return res.redirect(302, `http://localhost:3000?id=${req.user.id}`, );
   }
 }

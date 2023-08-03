@@ -10,7 +10,7 @@ import { CertificateRepository } from './certificate.repository';
 import { UserObject } from './entities/users.entity';
 import { InsertFriendDto } from './dto/insert-friend.dto';
 import { HttpService } from '@nestjs/axios';
-import { JwtService } from '@nestjs/jwt';
+// import { JwtService } from '@nestjs/jwt';
 import { firstValueFrom } from 'rxjs';
 import { response } from 'express';
 import { CreateCertificateDto } from './dto/create-certification.dto';
@@ -19,7 +19,7 @@ import { CreateCertificateDto } from './dto/create-certification.dto';
 export class UsersService {
   constructor(
     private httpService: HttpService,
-    private jwtService: JwtService,
+    // private jwtService: JwtService,
     private userObjectRepository: UserObjectRepository,
     private blockedRepository: BlockListRepository,
     private friendListRepository: FriendListRepository,
@@ -73,9 +73,10 @@ export class UsersService {
   }
 
   async createUser(createUsersDto: CreateUsersDto): Promise<UserObject> {
-    const { intra, nickname, imgUri } = createUsersDto;
+    const { userIdx, intra, nickname, imgUri } = createUsersDto;
 
     let user = this.userObjectRepository.create({
+      userIdx: userIdx,
       intra: intra,
       nickname: nickname,
       img: imgUri,
@@ -112,6 +113,7 @@ export class UsersService {
         return user;
       } else {
         user = await this.userObjectRepository.createUser({
+          userIdx : response.data.id,
           intra: response.data.login,
           nickname: response.data.login,
           imgUri: response.data.image.link,
