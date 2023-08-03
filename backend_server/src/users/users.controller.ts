@@ -10,11 +10,15 @@ import {
   Res,
   Query,
   Logger,
+  UseGuards,
+  Headers,
+  HttpStatus,
 } from '@nestjs/common';
 import { Response } from 'express';
 import { UsersService } from './users.service';
 import { CreateUsersDto } from './dto/create-users.dto';
 import { AuthService, CLIENT_ID, redirectUri } from 'src/auth/auth.service';
+import { AuthGuard } from '@nestjs/passport';
 
 
 @Controller()
@@ -45,23 +49,42 @@ export class UsersController {
   // }
   
   
-  @Post('auth')
-  loginOauth(@Res() res: Response, ) {
-    this.logger.log('loginOauth');
-    return res.redirect(301, `http://localhost:4000/login/auth`); 
+  // @Post('auth')
+  // loginOauth(@Res() res: Response, ) {
+  //   this.logger.log('loginOauth');
+  //   return res.redirect(302, `${redirectUri}`); 
+  // }
+
+  // description: '42 login 후 전달 받은 code'
+  
+  // @Get('auth/login/42/callback')
+  // async codeCallback(@Res() res: Response, @Query('code') query: string): Promise<void> {
+  //   this.logger.log('codeCallback');
+  //   this.logger.log('query check: ',query);
+  //   const intraInfo = await this.authService.getIntraInfo(query);
+  //   const payload = await this.authService.getTokenInfo(intraInfo);
+  //   res.cookie('token', this.authService.issueToken(payload));
+  //   res.header('Cache-Control', 'no-store');
+  //   console.log('redirect to localhost:3000/login');
+
+  //   return res.redirect(302, `localhost:3000/login`);
+  // }
+
+  @Get('auth/42')
+  @UseGuards(AuthGuard('ft'))
+  ftLogin(@Res() res) {
+    /*
+    res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+    res.header('Access-Control-Allow-Headers', '*');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    */ // cors 때문에 넣은거긴 해
   }
 
-  description: '42 login 후 전달 받은 code'
-  
-  @Get('login/auth')
-  async codeCallback(@Res() res: Response, @Query('code') query: string): Promise<void> {
-    this.logger.log('codeCallback');
-    this.logger.log('query check: ',query);
-    const intraInfo = await this.authService.getIntraInfo(query);
-    const payload = await this.authService.getTokenInfo(intraInfo);
-    res.cookie('token', this.authService.issueToken(payload));
-    res.header('Cache-Control', 'no-store');
-
-    return res.redirect(302, `localhost:3000/login`);
+  @Get('auth/login')
+  @UseGuards(AuthGuard('ft'))
+  getUser(@Req() req) {
+    console.log('getUser', req.user);
+    return req.user;
   }
 }

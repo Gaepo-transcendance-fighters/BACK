@@ -13,8 +13,9 @@ dotenv.config({
     path:
       process.env.NODE_ENV === 'dev' ? '/dev.backend.env' : '/prod.backend.env',
   });
- 
-  export const redirectUri = CALLBACK_URL || process.env.CALLBACK_URL;  
+  
+
+//   export const redirectUri = CALLBACK_URL || process.env.CALLBACK_URL;  
   export const clientId = CLIENT_ID || process.env.CLIENT_ID;
   const clientSecret = CLIENT_SECRET || process.env.CLIENT_SECRET;
   const jwtSecret = process.env.JWT_SECRET;
@@ -37,11 +38,14 @@ export class AuthService {
     params.set('client_secret', clientSecret);
     params.set('code', code);
     params.set('redirect_uri', redirectUri);
+
     console.log('parames ready, http POST start');
     const tokens = await lastValueFrom(
-      this.httpService.post(apiTokenUri, params),
+      this.httpService.post(apiTokenUri, params).pipe(),
     );
     console.log('http POST success with token');
+
+    console.log('http GET before check tokens', tokens);
     const userInfo = await lastValueFrom(
       this.httpService.get(apiMyInfoUri, {
         headers: {
