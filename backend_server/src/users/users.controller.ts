@@ -17,7 +17,7 @@ import {
 import { Response } from 'express';
 import { UsersService } from './users.service';
 import { CreateUsersDto } from './dto/create-users.dto';
-import { AuthService, CLIENT_ID, clientId, redirectUri } from 'src/auth/auth.service';
+import { AuthService, CLIENT_ID, redirectUri } from 'src/auth/auth.service';
 import { AuthGuard } from '@nestjs/passport';
 import { plainToClass } from 'class-transformer';
 import { UserObject } from './entities/users.entity';
@@ -43,14 +43,7 @@ export class UsersController {
   //   return data;
   // }
 
-  @Get('login/42')
-  @UseGuards (AuthGuard('ft'))
-  loginOauth(@Res() res: Response) {
-    this.logger.log('loginOauth');
-    console.log("res: ",res);
-    return res.redirect(302, `${redirectUri}`); 
-    
-  }
+
   
   
   // @Post('auth')
@@ -60,11 +53,9 @@ export class UsersController {
   // }
 
   // description: '42 login 후 전달 받은 code'
-  
-  @Get('auth/callback')
-  @UseGuards (AuthGuard('ft'))
-  async codeCallback(@Req() req, @Res() res: Response, @Query('code') query: string) {
-    this.logger.log('codeCallback');
+  /* 
+
+      this.logger.log('codeCallback');
     this.logger.log('query check: ',query);
     res.header('Cache-Control', 'no-store');
     // const { userIdx, intra, email, imgUri, accessToken, refreshToken } = req.user;
@@ -76,23 +67,29 @@ export class UsersController {
     
 
     // return res.redirect(302, `localhost:3000/login`);
+    // const { userIdx, username, email, image} = user;
+    // const dto = new CreateUsersDto(id, username, username, image );
+    
+    const sendResponse = (res: Response, statusCode: number, data: any) => {
+      res.status(statusCode).json(data);
+    };
     console.log('getUser', req.user);
     const user = req.user;
+    user.userIdx = req.user.userIdx;
     user.nickname = req.user.intra;
     // const { userIdx, username, email, image} = user;
     // const dto = new CreateUsersDto(id, username, username, image );
     const userDto = plainToClass(CreateUsersDto, user);
     console.log('userDto', userDto);
-    
     const createdUser = await this.usersService.createUser(userDto)
+    res.cookie('token', req.user.accessToken, {httpOnly: true, sameSite: 'none'});
     
-    // const credential  = await this.authService.issueToken(createdUser); 
+    sendResponse(res, 200, createdUser)
     console.log('createdUser', createdUser);
-    // console.log('redirect to localhost:3000/login');
-    res.cookie('token', req.user.accessToken);
-    res.json({user: createdUser, token: req.user.accessToken});
-    return res.redirect(302, `http://localhost:3000/login` );
+    return res.redirect(302, `http://localhost:3000`, );
   }
+  */
+
 
   @Get('auth/42')
   @UseGuards(AuthGuard('ft'))

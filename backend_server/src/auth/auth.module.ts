@@ -11,7 +11,8 @@ import { FtStrategy } from './auth.strategy';
     forwardRef(() => UsersModule),
     HttpModule,
   ],
-  providers: [AuthService, FtStrategy],
+  controllers: [AbortController],
+  providers: [AuthService, FtStrategy,],
   exports: [AuthService, FtStrategy],
 })
 export class AuthModule {}

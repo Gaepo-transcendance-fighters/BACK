@@ -10,7 +10,7 @@ export class FtStrategy extends PassportStrategy(Strategy, 'ft') {
       clientID: clientId || process.env.CLIENT_ID,
       clientSecret: CLIENT_SECRET || process.env.CLIENT_SECRET,
       callbackURL: 'http://localhost:4000/auth/callback' || process.env.CALLBACK_URL, // 'http://localhost:4000/auth/login'
-      failureRedirect: '/login' ,
+      failureRedirect: 'http://localhost:3000/login' ,
       profileFields: {
         userIdx: 'id',
         intra: 'login',

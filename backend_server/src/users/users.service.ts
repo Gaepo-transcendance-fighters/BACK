@@ -14,6 +14,7 @@ import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { response } from 'express';
 import { CreateCertificateDto } from './dto/create-certification.dto';
+import { CertificateObject } from './entities/certificate.entity';
 
 @Injectable()
 export class UsersService {
@@ -132,5 +133,19 @@ export class UsersService {
       }
     }
     return null;
+  }
+
+  async createCertificate(
+    createCertificateDto: CreateCertificateDto,
+    user: UserObject,
+    email: string,
+  ): Promise<CertificateObject> {
+    
+    return this.certificateRepository.insertCertificate(
+      createCertificateDto,
+      user,
+      true,
+      email
+    );
   }
 }
