@@ -1,5 +1,5 @@
 export interface IntraInfoDto {
-    intra: string;
+    userIdx : number;
     imgUri: string;
   }
   export interface JwtPayloadDto {

@@ -45,6 +45,9 @@ export class UsersService {
     }
     return (await user).intra;
   }
+  async findOneUser(userIdx: number): Promise<UserObject> {
+    return this.userObjectRepository.findOneBy({ userIdx });
+  }
 
   async blockTarget(
     blockTarget: BlockTargetDto,

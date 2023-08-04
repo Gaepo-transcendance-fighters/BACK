@@ -17,9 +17,10 @@ import {
 import { Response } from 'express';
 import { UsersService } from './users.service';
 import { CreateUsersDto } from './dto/create-users.dto';
-import { AuthService, CLIENT_ID, redirectUri } from 'src/auth/auth.service';
+import { AuthService, CLIENT_ID, clientId, redirectUri } from 'src/auth/auth.service';
 import { AuthGuard } from '@nestjs/passport';
 import { plainToClass } from 'class-transformer';
+import { UserObject } from './entities/users.entity';
 
 
 @Controller()
@@ -42,12 +43,14 @@ export class UsersController {
   //   return data;
   // }
 
-  // @Post('/auth/login')
-  // signIn(
-  //   @Body(ValidationPipe) createUsersDto: CreateUsersDto,
-  // ): Promise<string> {
-  //   return this.usersService.signIn(createUsersDto);
-  // }
+  @Get('login/42')
+  @UseGuards (AuthGuard('ft'))
+  loginOauth(@Res() res: Response) {
+    this.logger.log('loginOauth');
+    console.log("res: ",res);
+    return res.redirect(302, `${redirectUri}`); 
+    
+  }
   
   
   // @Post('auth')
@@ -58,33 +61,53 @@ export class UsersController {
 
   // description: '42 login 후 전달 받은 code'
   
-  // @Get('auth/login/42/callback')
-  // async codeCallback(@Res() res: Response, @Query('code') query: string): Promise<void> {
-  //   this.logger.log('codeCallback');
-  //   this.logger.log('query check: ',query);
-  //   const intraInfo = await this.authService.getIntraInfo(query);
-  //   const payload = await this.authService.getTokenInfo(intraInfo);
-  //   res.cookie('token', this.authService.issueToken(payload));
-  //   res.header('Cache-Control', 'no-store');
-  //   console.log('redirect to localhost:3000/login');
+  @Get('auth/callback')
+  @UseGuards (AuthGuard('ft'))
+  async codeCallback(@Req() req, @Res() res: Response, @Query('code') query: string) {
+    this.logger.log('codeCallback');
+    this.logger.log('query check: ',query);
+    res.header('Cache-Control', 'no-store');
+    // const { userIdx, intra, email, imgUri, accessToken, refreshToken } = req.user;
+    // const intraInfo = await this.authService.getIntraInfo(query);
 
-  //   return res.redirect(302, `localhost:3000/login`);
-  // }
+    // user.userIdx = req.user.userIdx;
+    // const payload = await this.authService.getTokenInfo({userIdx, imgUri});
+    // res.cookie('token', this.authService.issueToken(payload));
+    
+
+    // return res.redirect(302, `localhost:3000/login`);
+    console.log('getUser', req.user);
+    const user = req.user;
+    user.nickname = req.user.intra;
+    // const { userIdx, username, email, image} = user;
+    // const dto = new CreateUsersDto(id, username, username, image );
+    const userDto = plainToClass(CreateUsersDto, user);
+    console.log('userDto', userDto);
+    
+    const createdUser = await this.usersService.createUser(userDto)
+    
+    // const credential  = await this.authService.issueToken(createdUser); 
+    console.log('createdUser', createdUser);
+    // console.log('redirect to localhost:3000/login');
+    res.cookie('token', req.user.accessToken);
+    res.json({user: createdUser, token: req.user.accessToken});
+    return res.redirect(302, `http://localhost:3000/login` );
+  }
 
   @Get('auth/42')
   @UseGuards(AuthGuard('ft'))
-  ftLogin() {
-    /*
+  ftLogin(res: Response) {
+    
     res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
     res.header('Access-Control-Allow-Headers', '*');
     res.header('Access-Control-Allow-Credentials', 'true');
-    */ // cors 때문에 넣은거긴 해
+     // cors 때문에 넣은거긴 해
   }
 
   @Get('auth/login')
   @UseGuards(AuthGuard('ft'))
-  async getUser(@Req() req, @Res() res: Response) {
+  async getUser(@Req() req, @Res() res): Promise<UserObject> {
     console.log('getUser', req.user);
     const user = req.user;
     user.userIdx = req.user.userIdx;
