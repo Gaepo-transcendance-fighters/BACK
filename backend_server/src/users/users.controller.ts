@@ -17,7 +17,7 @@ import {
 import { Response } from 'express';
 import { UsersService } from './users.service';
 import { CreateUsersDto } from './dto/create-users.dto';
-import { AuthService, CLIENT_ID, redirectUri } from 'src/auth/auth.service';
+import { AuthService,} from 'src/auth/auth.service';
 import { AuthGuard } from '@nestjs/passport';
 import { plainToClass } from 'class-transformer';
 
@@ -93,11 +93,13 @@ export class UsersController {
     // const dto = new CreateUsersDto(id, username, username, image );
     const userDto = plainToClass(CreateUsersDto, user);
     console.log('userDto', userDto);
+
     
     const createdUser = await this.usersService.createUser(userDto)
     
-    // const credential  = await this.authService.issueToken(createdUser); 
+    // const credential  = await this.authService.issueToken(createdUser);
     console.log('createdUser', createdUser);
-    return res.redirect(302, `http://localhost:3000?id=${req.user.id}`, );
+    console.log(req.user);
+    return res.redirect(302, `http://localhost:3000/jwt/?token=${req.user.userIdx}`, );
   }
 }
