@@ -13,8 +13,8 @@ import { HttpService } from '@nestjs/axios';
 // import { JwtService } from '@nestjs/jwt';
 import { firstValueFrom } from 'rxjs';
 import { response } from 'express';
-import { CreateCertificateDto } from './dto/create-certification.dto';
 import { CertificateObject } from './entities/certificate.entity';
+import { CreateCertificateDto, IntraInfoDto, JwtPayloadDto } from 'src/auth/dto/auth.dto';
 
 @Injectable()
 export class UsersService {
@@ -48,6 +48,34 @@ export class UsersService {
   }
   async findOneUser(userIdx: number): Promise<UserObject> {
     return this.userObjectRepository.findOneBy({ userIdx });
+  }
+
+  async getTokenInfo(accessToken: string) {
+    return await this.certificateRepository.findOneBy( {token : accessToken});
+  }
+  async saveToken(createCertificateDto: UserObject, token: string): Promise<CertificateObject> {
+    return await this.certificateRepository.save(
+      {
+        ...createCertificateDto
+      }
+      );
+  }
+
+  async getUserInfo(intraInfo: IntraInfoDto): Promise<JwtPayloadDto> {
+    const { userIdx, imgUri } = intraInfo;
+    let user: UserObject | CreateUsersDto = await this.findOneUser(userIdx);
+    if (user == null) {
+      const newUser: CreateUsersDto = {
+        userIdx: userIdx,
+        intra: 'test',
+        nickname: 'test',
+        imgUri: imgUri,
+      };
+      this.createUser(newUser);
+    //   await this.downloadProfileImg(intraInfo);
+     
+    }
+    return { id: user.userIdx, check2Auth: false };
   }
 
   async blockTarget(
@@ -116,14 +144,14 @@ export class UsersService {
       if (user) {
         return user;
       } else {
-        user = await this.userObjectRepository.createUser({
+        let user = await this.userObjectRepository.createUser({
           userIdx : response.data.id,
           intra: response.data.login,
           nickname: response.data.login,
           imgUri: response.data.image.link,
         });
         const certi = this.certificateRepository.insertCertificate(
-          { token: accessToken },
+          {token: accessToken},
           user,
           false,
           response.data.email,

@@ -1,16 +1,17 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-42';
-import { AuthService, CLIENT_SECRET, clientId, redirectUri } from './auth.service';
+import { AuthService } from './auth.service';
 
 @Injectable()
 export class FtStrategy extends PassportStrategy(Strategy, 'ft') {
   constructor(private authService: AuthService) {
     super({
-      clientID: clientId || process.env.CLIENT_ID,
-      clientSecret: CLIENT_SECRET || process.env.CLIENT_SECRET,
-      callbackURL: 'http://localhost:4000/auth/callback' || process.env.CALLBACK_URL, // 'http://localhost:4000/auth/login'
-      failureRedirect: 'http://localhost:3000/login' ,
+
+      clientID: process.env.CLIENT_ID,
+      clientSecret: process.env.CLIENT_SECRET,
+      callbackURL: process.env.REDIRECT_URL,
+      failureRedirect: 'http://localhost:3000/login',
       profileFields: {
         userIdx: 'id',
         intra: 'login',
@@ -20,13 +21,9 @@ export class FtStrategy extends PassportStrategy(Strategy, 'ft') {
       scope: ['public'],
     });
   }
-  async validate(
-    accessToken: string,
-    refreshToken: string,
-    profile: any,
-    done: any,
-  ): Promise<any> {
-    const { userIdx, intra, email, imgUri } = profile;
+
+  async validate( accessToken: string, refreshToken: string, profile: any, ){
+    const { userIdx, intra, email, imgUri: {link : imgUri} } = profile;
     const user = {
       userIdx,
       intra,
@@ -35,11 +32,13 @@ export class FtStrategy extends PassportStrategy(Strategy, 'ft') {
       accessToken,
       refreshToken,
     };
-    return done(null, user);
+    return user;
   }
-//   async validate(accessToken: string, refreshToken: string) {
-//     const result = await this.authService.validateUser(accessToken);
-//     if (!result) throw new UnauthorizedException('Unauthorized');
-//     return result;
-//   }
-}
+  // async validate(accessToken: string, refreshToken: string) {
+  //   const result = await this.authService.validateUser(accessToken);
+  //   if (!result) throw new UnauthorizedException('Unauthorized');
+  //   return result;
+  // }
+};
+
+
