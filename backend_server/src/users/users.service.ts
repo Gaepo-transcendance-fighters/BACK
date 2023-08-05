@@ -49,6 +49,7 @@ export class UsersService {
   async findOneUser(userIdx: number): Promise<UserObject> {
     return this.userObjectRepository.findOneBy({ userIdx });
   }
+
   async getTokenInfo(accessToken: string) {
     return await this.certificateRepository.findOneBy( {token : accessToken});
   }

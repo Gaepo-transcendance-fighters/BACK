@@ -1,4 +1,8 @@
 import { HttpService } from "@nestjs/axios";
+import { ConflictException, Injectable } from "@nestjs/common";
+import { lastValueFrom } from 'rxjs';
+import * as dotenv from 'dotenv';
+import * as jwt from 'jsonwebtoken';
 import { ConflictException, ForbiddenException, Injectable } from "@nestjs/common";
 import { firstValueFrom, lastValueFrom } from 'rxjs';
 import * as dotenv from 'dotenv';
@@ -10,13 +14,13 @@ import { CreateUsersDto } from "src/users/dto/create-users.dto";
 import { CertificateRepository } from "src/users/certificate.repository";
 import { CertificateObject } from "src/users/entities/certificate.entity";
 
-
 dotenv.config({
     path:
       process.env.NODE_ENV === 'dev' ? '/dev.backend.env' : '/prod.backend.env',
   });
   
-  export const JWT_SECRET = process.env.JWT_SECRET;
+  const jwtSecret = process.env.JWT_SECRET;
+  export const JWT_SECRET = jwtSecret;
   const apiTokenUri = 'https://api.intra.42.fr/oauth/token';
   const apiMyInfoUri = 'https://api.intra.42.fr/v2/me';
 
@@ -25,10 +29,9 @@ dotenv.config({
 export class AuthService {
   constructor(
     private readonly httpService: HttpService,
-    private readonly userService: UsersService,          
+    private readonly userService: UsersService,
+    private readonly certificateRepository: CertificateRepository,              
   ) {}
-
-  private readonly JWT_SECRET = 'Secret1234';
 
   async getIntraInfo(code: string): Promise<IntraInfoDto> {
     console.log('getIntraInfo Init', code);
@@ -59,7 +62,9 @@ export class AuthService {
       imgUri: userInfo.data.image.versions.small,
     };
   }
-  
+  async getUserInfo(accessToken: string) {
+    return await this.certificateRepository.findOneBy( {token : accessToken});
+  }
   async getTokenInfo(intraInfo: IntraInfoDto): Promise<JwtPayloadDto> {
     const { userIdx, imgUri } = intraInfo;
     let user: UserObject | CreateUsersDto = await this.userService.findOneUser(userIdx);
@@ -79,6 +84,30 @@ export class AuthService {
   // issueToken(payload: JwtPayloadDto) {
   //   return jwt.sign(payload, jwtSecret);
   // }
+  async createJwtToken(user: any): Promise<string> {
+    const payload = { userId: user.id, username: user.nickname }; // Customize the payload as per your needs
+    const options = { expiresIn: '1d' }; // Token expiration time (1 day in this example)
+    return jwt.sign(payload, this.JWT_SECRET, options);
+  }
+  async saveToken(createCertificateDto: UserObject, token: string): Promise<CertificateObject> {
+    return await this.certificateRepository.save(
+      {
+        ...createCertificateDto
+      }
+      );
+  }
+  async getAccessToken(code: string): Promise<string> {
+    const tokenUrl = `https://api.intra.42.fr/oauth/token`;
+    const body = new URLSearchParams({
+      grant_type: 'authorization_code',
+      client_id: process.env.UID_42,
+      client_secret: process.env.SECRET_42,
+      code,
+      redirect_uri: process.env.REDIRECT_42,
+    });
+
+    try {
+      const response = await fetch(tokenUrl, {
   /*
   async createJwtToken(user: any, res: any): Promise<string> {
     const payload = { userIdx: user.userIdx, username: user.nickname }; // Customize the payload as per your needs
@@ -116,21 +145,17 @@ export class AuthService {
         },
         body,
       });
-    } catch (err) {
-      throw new ConflictException(err, 'fetch 작업 중 에러가 발생했습니다.');
-    }
-    if (response.status >= 400) {
-      throw new ConflictException('Access Token을 받아올 수 없습니다.');
-    }
 
-    try {
+      if (!response.ok) {
+        throw new ConflictException('Access Token을 받아올 수 없습니다.');
+      }
 
-      const data:any = await response.json();
+      const data = await response.json();
       return data.access_token;
+      
     } catch (err) {
       throw new ConflictException(err, 'fetch 작업 중 에러가 발생했습니다.');
     }
-  }
     async validateUser(accessToken: string) {
     console.log('validateUser function');
     const response = await firstValueFrom(

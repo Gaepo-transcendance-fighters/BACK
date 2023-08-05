@@ -7,6 +7,7 @@ import { AuthService } from './auth.service';
 export class FtStrategy extends PassportStrategy(Strategy, 'ft') {
   constructor(private authService: AuthService) {
     super({
+
       clientID: process.env.CLIENT_ID,
       clientSecret: process.env.CLIENT_SECRET,
       callbackURL: process.env.REDIRECT_URL,
