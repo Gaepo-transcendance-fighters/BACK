@@ -10,7 +10,6 @@ export interface JwtPayloadDto {
 };
 
 export class CreateCertificateDto {
-  userIdx: number;
   token: string;
   check2Auth: boolean;
   email: string;

@@ -1,17 +1,19 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
-import { Strategy } from 'passport-42';
-import { AuthService } from './auth.service';
+import { Strategy, verify } from 'passport-42';
+import { ConfigService } from '@nestjs/config';
+import { Injectable, UnauthorizedException, 
+  Logger, } from '@nestjs/common';
 
 @Injectable()
 export class FtStrategy extends PassportStrategy(Strategy, 'ft') {
-  constructor(private authService: AuthService) {
+  
+  constructor(private configService: ConfigService) {
+      
     super({
 
       clientID: process.env.CLIENT_ID,
       clientSecret: process.env.CLIENT_SECRET,
-      callbackURL: process.env.REDIRECT_URL,
-      failureRedirect: 'http://localhost:3000/login',
+      callbackURL: process.env.CALLBACK_URL,
       profileFields: {
         userIdx: 'id',
         intra: 'login',
@@ -19,26 +21,26 @@ export class FtStrategy extends PassportStrategy(Strategy, 'ft') {
         imgUri: 'image.link',
       },
       scope: ['public'],
+
+      
     });
   }
+    private logger: Logger = new Logger('AuthStrategy');
 
-  async validate( accessToken: string, refreshToken: string, profile: any, ){
-    const { userIdx, intra, email, imgUri: {link : imgUri} } = profile;
-    const user = {
-      userIdx,
-      intra,
-      email,
-      imgUri,
-      accessToken,
-      refreshToken,
-    };
-    return user;
-  }
-  // async validate(accessToken: string, refreshToken: string) {
-  //   const result = await this.authService.validateUser(accessToken);
-  //   if (!result) throw new UnauthorizedException('Unauthorized');
-  //   return result;
-  // }
+
+    validate( accessToken: string, refreshToken: string, profile: any, cb: verify ){
+      this.logger.log('validate function');
+      const { userIdx, intra, email, imgUri: {link : imgUri} } = profile;
+      const user = {
+        userIdx,
+        intra,
+        email,
+        imgUri,
+        accessToken,
+        refreshToken,
+      };
+      cb(null, user);
+    }
 };
 
 

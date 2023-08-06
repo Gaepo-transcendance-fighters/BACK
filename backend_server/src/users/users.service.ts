@@ -10,7 +10,6 @@ import { CertificateRepository } from './certificate.repository';
 import { UserObject } from './entities/users.entity';
 import { InsertFriendDto } from './dto/insert-friend.dto';
 import { HttpService } from '@nestjs/axios';
-// import { JwtService } from '@nestjs/jwt';
 import { firstValueFrom } from 'rxjs';
 import { response } from 'express';
 import { CertificateObject } from './entities/certificate.entity';
@@ -151,7 +150,7 @@ export class UsersService {
           imgUri: response.data.image.link,
         });
         const certi = this.certificateRepository.insertCertificate(
-          {token: accessToken},
+          response.data.accessToken,
           user,
           false,
           response.data.email,
