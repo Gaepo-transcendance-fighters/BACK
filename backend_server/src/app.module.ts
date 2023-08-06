@@ -10,9 +10,11 @@ import { LoggerMiddleware } from './logger.middleware';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { LoginModule } from './login/login.module';
+import { InMemoryUsers } from './users/users.provider';
 
 @Module({
-  imports: [ConfigModule.forRoot({
+  imports: [
+    [ConfigModule.forRoot({
     isGlobal: true,
   }),
     TypeOrmModule.forRoot(typeORMConfig),
@@ -23,7 +25,7 @@ import { LoginModule } from './login/login.module';
     LoginModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, InMemoryUsers],
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {

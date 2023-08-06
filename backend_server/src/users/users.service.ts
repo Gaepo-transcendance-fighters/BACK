@@ -1,7 +1,6 @@
 import { BadRequestException, ForbiddenException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { UserObjectRepository } from './users.repository';
 import { CreateUsersDto } from './dto/create-users.dto';
-import { InjectRepository } from '@nestjs/typeorm';
 import { BlockTargetDto } from './dto/block-target.dto';
 import { v4 as uuidv4 } from 'uuid';
 import { BlockListRepository } from './blockList.repository';
@@ -14,13 +13,14 @@ import { firstValueFrom } from 'rxjs';
 import { response } from 'express';
 import { CertificateObject } from './entities/certificate.entity';
 import { CreateCertificateDto, IntraInfoDto, JwtPayloadDto } from 'src/auth/dto/auth.dto';
+import { Socket } from 'socket.io';
 
 @Injectable()
 export class UsersService {
   constructor(
     private httpService: HttpService,
     private userObjectRepository: UserObjectRepository,
-    private blockedRepository: BlockListRepository,
+    private blockedListRepository: BlockListRepository,
     private friendListRepository: FriendListRepository,
     private certificateRepository: CertificateRepository,
   ) {}
@@ -80,7 +80,7 @@ export class UsersService {
     blockTarget: BlockTargetDto,
     user: UserObject,
   ): Promise<string> {
-    return this.blockedRepository.blockTarget(
+    return this.blockedListRepository.blockTarget(
       blockTarget,
       user,
       this.userObjectRepository,
@@ -178,4 +178,40 @@ export class UsersService {
       email
     );
   }
+}
+  async getAllUsersFromDB(): Promise<UserObject[]> {
+    return this.userObjectRepository.find();
+  }
+
+  async getUserInfoFromDB(intra: string): Promise<UserObject> {
+    return this.userObjectRepository.findOne({ where: { intra: intra } });
+  }
+
+  async getFriendList(
+    intra: string,
+  ): Promise<{ friendNicname: string; isOnline: boolean }[]> {
+    const user: UserObject = await this.userObjectRepository.findOne({
+      where: { intra: intra },
+    });
+    return this.friendListRepository.getFriendList(
+      user.userIdx,
+      this.userObjectRepository,
+    );
+  }
+
+  async getBlockedList(intra: string) {
+    const user: UserObject = await this.userObjectRepository.findOne({
+      where: { intra: intra },
+    });
+    return this.blockedListRepository.getBlockedList(user);
+  }
+
+  async setIsOnline(user: UserObject, isOnline: boolean) {
+    // user.isOnline = isOnline;
+    return this.userObjectRepository.setIsOnline(user, isOnline);
+  }
+
+  // async getUserId(client: Socket): Promise<number> {
+  //   return parseInt(client.handshake.query.userId as string, 10);
+  // }
 }

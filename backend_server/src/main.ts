@@ -8,6 +8,8 @@ import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.int
 
 async function bootstrap() {
   dotenv.config({ path: '/.env' });
+  const server = config.get('server');
+
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const corsOptions: CorsOptions = {
     origin: true,
@@ -17,6 +19,16 @@ async function bootstrap() {
   app.enableCors(corsOptions);
   app.useGlobalPipes(new ValidationPipe());
   
-  await app.listen(4000);
+  await app.listen(server.port);
+  console.log(`listening on port, ${server.port}`);
+
+// declare const module: any;
+
+
+
+  //   if (module.hot) {
+  //     module.hot.accept();
+  //     module.hot.dispose(() => app.close());
+  //   }
 }
 bootstrap();
