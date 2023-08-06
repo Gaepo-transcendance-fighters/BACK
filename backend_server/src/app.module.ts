@@ -9,6 +9,7 @@ import { GameModule } from './game/game.module';
 import { LoggerMiddleware } from './logger.middleware';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
+import { LoginModule } from './login/login.module';
 
 @Module({
   imports: [ConfigModule.forRoot({
@@ -19,12 +20,13 @@ import { ConfigModule } from '@nestjs/config';
     UsersModule,
     GameModule,
     AuthModule,
+    LoginModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(LoggerMiddleware).forRoutes('/auth/42'); // 맨 처음 들어가는
+    consumer.apply(LoggerMiddleware).forRoutes('login'); // 맨 처음 들어가는
   }
 }
