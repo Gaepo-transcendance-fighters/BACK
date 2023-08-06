@@ -1,4 +1,4 @@
-import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { UserObjectRepository } from './users.repository';
 import { CreateUsersDto } from './dto/create-users.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -19,7 +19,6 @@ import { CreateCertificateDto, IntraInfoDto, JwtPayloadDto } from 'src/auth/dto/
 export class UsersService {
   constructor(
     private httpService: HttpService,
-    // private jwtService: JwtService,
     private userObjectRepository: UserObjectRepository,
     private blockedRepository: BlockListRepository,
     private friendListRepository: FriendListRepository,
@@ -52,7 +51,7 @@ export class UsersService {
   async getTokenInfo(accessToken: string) {
     return await this.certificateRepository.findOneBy( {token : accessToken});
   }
-  async saveToken(createCertificateDto: UserObject, token: string): Promise<CertificateObject> {
+  async saveToken(createCertificateDto: CreateCertificateDto, token: string): Promise<CertificateObject> {
     return await this.certificateRepository.save(
       {
         ...createCertificateDto
@@ -109,7 +108,7 @@ export class UsersService {
     let user = this.userObjectRepository.create({
       userIdx: userIdx,
       intra: intra,
-      nickname: nickname,
+      nickname: intra,
       img: imgUri,
       rankpoint: 0,
       isOnline: true,
@@ -137,24 +136,28 @@ export class UsersService {
     });
     if (response) {
       console.log(response.data.id);
+
       let user:UserObject = await this.userObjectRepository.findOne({
         where: { userIdx: response.data.id },
       });
       if (user) {
         return user;
       } else {
-        let user = await this.userObjectRepository.createUser({
+        const user = await this.userObjectRepository.createUser({
           userIdx : response.data.id,
           intra: response.data.login,
           nickname: response.data.login,
           imgUri: response.data.image.link,
         });
-        const certi = this.certificateRepository.insertCertificate(
+        const certi = await this.certificateRepository.insertCertificate(
           response.data.accessToken,
           user,
           false,
           response.data.email,
         )
+        if (certi == null) throw new InternalServerErrorException(
+          '서버에 문제가 발생했습니다.',
+        );
         console.log('certificate insert', certi);
         return user;
       }

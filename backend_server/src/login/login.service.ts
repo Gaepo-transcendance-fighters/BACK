@@ -32,19 +32,19 @@ export class LoginService {
   private logger: Logger = new Logger('LoginService');
 
   async getIntraInfo(code: string): Promise<IntraInfoDto> {
-    this.logger.log(`getIntraInfo: code=${code}`)
-    const params = new URLSearchParams();
-    params.set('grant_type', 'authorization_code');
-    params.set('client_id', process.env.CLIENT_ID);
-    params.set('client_secret', process.env.CLIENT_SECRET);
-    params.set('code', code);
-    params.set('redirect_uri', process.env.FRONT_CALLBACK_URI);
+    this.logger.log(`getIntraInfo start: code= \n${code}`)
+    const params = await new URLSearchParams();
+    await params.set('grant_type', 'authorization_code');
+    await params.set('client_id', process.env.CLIENT_ID);
+    await params.set('client_secret', process.env.CLIENT_SECRET);
+    await params.set('code', code);
+    await params.set('redirect_uri', process.env.FRONT_CALLBACK_URI);
 
     const tokens = await lastValueFrom(
-      this.httpService.post(intraApiTokenUri, params),
+      await this.httpService.post(intraApiTokenUri, params),
     );
 
-    this.logger.log('getIntraInfo: tokens', tokens.data);
+    this.logger.log('getIntraInfo : tokens', tokens.data);
     const userInfo = await lastValueFrom(
       this.httpService.get(intraApiMyInfoUri, {
         headers: {
@@ -52,25 +52,35 @@ export class LoginService {
         },
       }),
     );
-
+    
     this.logger.log('getIntraInfo: userInfo', userInfo.data.id, userInfo.data.image.versions.small);
-
+    
+    let val = await this.usersService.validateUser(tokens.data.accessToken);
+    if (!val) {
+      throw new HttpException(
+        'Unauthorized',
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
     return {
       userIdx: userInfo.data.id,
+      intra: userInfo.data.login,
       imgUri: userInfo.data.image.versions.small,
     };
   }
 
   
+  
 
-  issueToken(payload: JwtPayloadDto) {
+  async issueToken(payload: JwtPayloadDto) {
     return jwt.sign(payload, jwtSecret);
   }
-
+  
+  
 
 
   async getTokenInfo(intraInfo: IntraInfoDto): Promise<JwtPayloadDto> {
-    const { userIdx, imgUri } = intraInfo;
+    const { userIdx, imgUri, intra } = intraInfo;
     let user: UserObject | CreateUsersDto = await this.usersService.findOneUser(userIdx);
     if (user == null) {
       const displayName =
@@ -79,17 +89,19 @@ export class LoginService {
           : Math.random().toString(36).substring(2, 11);
       const newUser: CreateUsersDto = {
         userIdx,
-        intra: user.intra,
-        nickname : user.nickname,
+        intra: intra,
+        nickname : intra,
         imgUri: imgUri,
         
       };
       user = newUser;
+      await this.usersService.createUser(newUser);
+      
     }
 
     return {
       id: user.userIdx,
-      check2Auth: true,
+      check2Auth: false,
     };
   }
 }
