@@ -5,6 +5,7 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
   OneToMany,
+  PrimaryColumn,
 } from 'typeorm';
 import { FriendList } from './friendList.entity';
 import { BlockList } from './blockList.entity';
@@ -15,7 +16,7 @@ import { GameChannel } from 'src/game/entity/gameChannel.entity';
 
 @Entity('users')
 export class UserObject extends BaseEntity {
-  @PrimaryGeneratedColumn()
+  @PrimaryColumn()
   userIdx: number;
 
   @Column()
@@ -25,7 +26,7 @@ export class UserObject extends BaseEntity {
   nickname: string;
 
   @Column()
-  imgUri: string;
+  img: string;
 
   @Column()
   rankpoint: number;

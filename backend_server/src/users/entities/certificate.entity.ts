@@ -16,6 +16,9 @@ export class CertificateObject extends BaseEntity {
   @Column()
   userIdx: number;
 
+  @Column()
+  email: string
+
   @Column({ default: false })
   check2Auth: boolean;
 
