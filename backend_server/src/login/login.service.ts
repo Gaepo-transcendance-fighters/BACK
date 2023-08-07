@@ -32,19 +32,22 @@ export class LoginService {
   private logger: Logger = new Logger('LoginService');
 
   async getIntraInfo(code: string): Promise<IntraInfoDto> {
-    this.logger.log(`getIntraInfo start: code= \n${code}`)
-    const params = await new URLSearchParams();
-    await params.set('grant_type', 'authorization_code');
-    await params.set('client_id', process.env.CLIENT_ID);
-    await params.set('client_secret', process.env.CLIENT_SECRET);
-    await params.set('code', code);
-    await params.set('redirect_uri', process.env.FRONT_CALLBACK_URI);
 
+    // 여기에 헤더 bearder 가 존재하는지 확인하는 코드가 필요함
+    /* https://api.intra.42.fr/oauth/token?grant_type=authorization_code&client_id=${client_id}&client_secret=${client_secret}&code=${code}&redirect_uri=${redirect_uri} */
+    this.logger.log(`getIntraInfo start: code= \n${code}`)
+    const params = new URLSearchParams();
+    params.set('grant_type', 'authorization_code');
+    params.set('client_id', process.env.CLIENT_ID);
+    params.set('client_secret', process.env.CLIENT_SECRET);
+    params.set('code', code);
+    params.set('redirect_uri', process.env.FRONT_CALLBACK_URI);
+    
     const tokens = await lastValueFrom(
-      await this.httpService.post(intraApiTokenUri, params),
+      this.httpService.post(intraApiTokenUri, params)
     );
 
-    this.logger.log('getIntraInfo : tokens', tokens.data);
+    this.logger.log(`getIntraInfo : token.data.headers= ${tokens.data.headers}`);
     const userInfo = await lastValueFrom(
       this.httpService.get(intraApiMyInfoUri, {
         headers: {
@@ -52,20 +55,16 @@ export class LoginService {
         },
       }),
     );
+    // httpService.get() 메서드 안에서 headers: Authorization 이 존재하는지 확인하는 코드가 필요함
     
-    this.logger.log('getIntraInfo: userInfo', userInfo.data.id, userInfo.data.image.versions.small);
+    this.logger.log(`getIntraInfo: userInfo : ${userInfo.data.id}, ${userInfo.data.image.versions.small}`);
     
-    let val = await this.usersService.validateUser(tokens.data.accessToken);
-    if (!val) {
-      throw new HttpException(
-        'Unauthorized',
-        HttpStatus.UNAUTHORIZED,
-      );
-    }
     return {
       userIdx: userInfo.data.id,
       intra: userInfo.data.login,
       imgUri: userInfo.data.image.versions.small,
+      accessToken : tokens.data.access_token,
+      email: userInfo.data.email,
     };
   }
 
@@ -73,35 +72,43 @@ export class LoginService {
   
 
   async issueToken(payload: JwtPayloadDto) {
-    return jwt.sign(payload, jwtSecret);
+    const paytoken = jwt.sign(payload, jwtSecret);
+    
+    this.logger.log('paytoken', paytoken);
+    return paytoken;
   }
   
   
 
 
-  async getTokenInfo(intraInfo: IntraInfoDto): Promise<JwtPayloadDto> {
-    const { userIdx, imgUri, intra } = intraInfo;
+  async getUserInfo(intraInfo: IntraInfoDto): Promise<JwtPayloadDto> {
+    this.logger.log('getUserInfo start');
+    const { userIdx, imgUri, intra, accessToken, email } = intraInfo;
     let user: UserObject | CreateUsersDto = await this.usersService.findOneUser(userIdx);
-    if (user == null) {
-      const displayName =
-      userIdx === 98324
-          ? 'unknown'
-          : Math.random().toString(36).substring(2, 11);
+    if (user === null || user === undefined) {
       const newUser: CreateUsersDto = {
         userIdx,
         intra: intra,
         nickname : intra,
         imgUri: imgUri,
-        
+        certificate: null,
+        email: null,
       };
-      user = newUser;
-      await this.usersService.createUser(newUser);
-      
+      user = await this.usersService.createUser(newUser);
+      this.logger.log('createUser called');
+      const savedtoken = await this.usersService.saveToken({
+        token: accessToken,
+        check2Auth: false,
+        email: email,
+        userIdx: userIdx,
+      });
+      this.logger.log(`saveToken called : ${savedtoken}`);
     }
 
     return {
       id: user.userIdx,
       check2Auth: false,
+      accessToken: accessToken,
     };
   }
 }
