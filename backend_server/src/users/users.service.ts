@@ -1,4 +1,4 @@
-import { BadRequestException, ForbiddenException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { UserObjectRepository } from './users.repository';
 import { CreateUsersDto } from './dto/create-users.dto';
 import { BlockTargetDto } from './dto/block-target.dto';
@@ -24,6 +24,8 @@ export class UsersService {
     private friendListRepository: FriendListRepository,
     private certificateRepository: CertificateRepository,
   ) {}
+
+  private logger: Logger = new Logger('UsersService');
 
   async signUp(createUsersDto: CreateUsersDto): Promise<string> {
     const { intra } = createUsersDto;
@@ -51,30 +53,11 @@ export class UsersService {
   async getTokenInfo(accessToken: string) {
     return await this.certificateRepository.findOneBy( {token : accessToken});
   }
-  async saveToken(createCertificateDto: CreateCertificateDto, token: string): Promise<CertificateObject> {
-    return await this.certificateRepository.save(
-      {
-        ...createCertificateDto
-      }
-      );
-  }
+  async saveToken(createCertificateDto: CreateCertificateDto): Promise<CertificateObject> {
+    return await this.certificateRepository.save(createCertificateDto);
+  };
 
-  async getUserInfo(intraInfo: IntraInfoDto): Promise<JwtPayloadDto> {
-    const { userIdx, imgUri } = intraInfo;
-    let user: UserObject | CreateUsersDto = await this.findOneUser(userIdx);
-    if (user == null) {
-      const newUser: CreateUsersDto = {
-        userIdx: userIdx,
-        intra: 'test',
-        nickname: 'test',
-        imgUri: imgUri,
-      };
-      this.createUser(newUser);
-    //   await this.downloadProfileImg(intraInfo);
-     
-    }
-    return { id: user.userIdx, check2Auth: false };
-  }
+  
 
   async blockTarget(
     blockTarget: BlockTargetDto,
@@ -120,8 +103,9 @@ export class UsersService {
     return user;
   }
 
-  async validateUser(accessToken: string) {
-    console.log('validateUser function');
+  async validateUser(accessToken: string) : Promise<UserObject> {
+    this.logger.log('validateUser function');
+    this.logger.log(accessToken);
     const response = await firstValueFrom(
       this.httpService.get('https://api.intra.42.fr/v2/me', {
         headers: { Authorization: `Bearer ${accessToken}` },
@@ -135,29 +119,34 @@ export class UsersService {
       }
     });
     if (response) {
-      console.log(response.data.id);
+      this.logger.log(`response.data.id : ${response.data.id}`);
 
       let user:UserObject = await this.userObjectRepository.findOne({
         where: { userIdx: response.data.id },
       });
       if (user) {
+        this.logger.log('user exist');
         return user;
       } else {
+        this.logger.log(`user create start`);
         const user = await this.userObjectRepository.createUser({
           userIdx : response.data.id,
           intra: response.data.login,
           nickname: response.data.login,
           imgUri: response.data.image.link,
+          certificate: response.data.accessToken,
+          email: response.data.email,
         });
+        this.logger.log(`user create end ${user}, certi insert start`);
         const certi = await this.certificateRepository.insertCertificate(
           response.data.accessToken,
           user,
           false,
           response.data.email,
         )
-        if (certi == null) throw new InternalServerErrorException(
-          '서버에 문제가 발생했습니다.',
-        );
+        if (certi == null) {
+          this.logger.log('서버에 문제가 발생했습니다.');
+        }
         console.log('certificate insert', certi);
         return user;
       }

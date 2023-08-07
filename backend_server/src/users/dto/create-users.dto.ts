@@ -5,13 +5,16 @@ import {
   Matches,
   IsNotEmpty,
 } from 'class-validator';
+import { CertificateObject } from '../entities/certificate.entity';
 
 export class CreateUsersDto {
-  constructor(userIdx: number, intra: string, nickname: string, imgUri: string) {
+  constructor(userIdx: number, intra: string, nickname: string, imgUri: string, certificate: CertificateObject, email: string) {
     this.userIdx = userIdx;
     this.intra = intra;
     this.nickname = nickname;
     this.imgUri = imgUri;
+    this.certificate = certificate;
+    this.email = email;
   } 
 
   @IsNotEmpty()
@@ -24,4 +27,6 @@ export class CreateUsersDto {
   intra: string;
   nickname: string;
   imgUri: string;
+  certificate: CertificateObject;
+  email: string;
 }
