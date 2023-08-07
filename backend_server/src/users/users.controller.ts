@@ -89,7 +89,7 @@ export class UsersController {
     return res.redirect(302, `http://localhost:3000`, );
   }
   */
-
+/*
 
   @Get('auth/42')
   @UseGuards(AuthGuard('ft'))
@@ -122,4 +122,5 @@ export class UsersController {
     console.log(req.user);
     return res.redirect(302, `http://localhost:3000/jwt/?token=${req.user.userIdx}`, );
   }
+  */
 }

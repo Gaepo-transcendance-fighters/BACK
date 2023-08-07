@@ -7,11 +7,12 @@ export interface IntraInfoDto {
 export interface JwtPayloadDto {
   id: number;
   check2Auth: boolean;
+  accessToken: string; // 임시
 };
 
 export class CreateCertificateDto {
   token: string;
   check2Auth: boolean;
   email: string;
-  user: UserObject
+  userIdx: number;
 };
