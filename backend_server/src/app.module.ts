@@ -14,7 +14,7 @@ import { InMemoryUsers } from './users/users.provider';
 
 @Module({
   imports: [
-    [ConfigModule.forRoot({
+    ConfigModule.forRoot({
     isGlobal: true,
   }),
     TypeOrmModule.forRoot(typeORMConfig),

@@ -7,16 +7,15 @@ import { CreateCertificateDto } from 'src/auth/dto/auth.dto';
 @CustomRepository(CertificateObject)
 export class CertificateRepository extends Repository<CertificateObject> {
   async insertCertificate(
-    tokenDto: CreateCertificateDto,
-    user: UserObject,
+    token: string,
     check2Auth: boolean,
     email: string,
+    userIdx: number,
   ){
-    const { token } = tokenDto;
 
     const certificate = this.create({
       token: token,
-      userIdx: user.userIdx,
+      userIdx: userIdx,
       check2Auth: check2Auth,
       email: email,
     });

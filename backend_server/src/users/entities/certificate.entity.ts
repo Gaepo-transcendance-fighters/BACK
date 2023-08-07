@@ -21,7 +21,4 @@ export class CertificateObject extends BaseEntity {
 
   @Column({ default: false })
   check2Auth: boolean;
-
-  @OneToOne(() => UserObject, (userIdx) => userIdx.userIdx)
-  userObject: UserObject;
 }

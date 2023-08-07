@@ -5,9 +5,9 @@ import { lastValueFrom } from 'rxjs';
 import * as jwt from 'jsonwebtoken';
 import * as dotenv from 'dotenv';
 import { JwtPayloadDto } from 'src/auth/dto/auth.dto';
-
-import { CreateUsersDto } from 'src/users/dto/create-users.dto';
 import { IntraInfoDto } from 'src/users/dto/user.dto';
+import { CreateUsersDto } from 'src/users/dto/create-users.dto';
+
 import { UserObject } from 'src/users/entities/users.entity';
 import { UsersService } from 'src/users/users.service';
 
@@ -20,7 +20,7 @@ export const redirectUri = process.env.REDIRECT_URI;
 export const apiUid = process.env.CLIENT_ID;
 const apiSecret = process.env.CLIENT_SECRET;
 const jwtSecret = process.env.JWT_SECRET;
-const intraApiTokenUri = 'https://api.intra.42.fr/oauth/token';
+export const intraApiTokenUri = 'https://api.intra.42.fr/oauth/token';
 const intraApiMyInfoUri = 'https://api.intra.42.fr/v2/me';
 
 @Injectable()
@@ -62,7 +62,7 @@ export class LoginService {
     return {
       userIdx: userInfo.data.id,
       intra: userInfo.data.login,
-      imgUri: userInfo.data.image.versions.small,
+      img: userInfo.data.image.versions.small,
       accessToken : tokens.data.access_token,
       email: userInfo.data.email,
     };
@@ -79,23 +79,32 @@ export class LoginService {
   }
   
   
+  
 
 
   async getUserInfo(intraInfo: IntraInfoDto): Promise<JwtPayloadDto> {
     this.logger.log('getUserInfo start');
-    const { userIdx, imgUri, intra, accessToken, email } = intraInfo;
+    /* 
+    userIdx: number;
+    intra: string;
+    img: string;
+    accessToken: string;
+    email: string; 
+    */
+  //  const dto = new CreateUsersDto(id, username, username, image );
+    // const intrainfoDto = new IntraInfoDto( userIdx, intra, img, accessToken, email );
+    const { userIdx, intra, img, accessToken, email } = intraInfo;
+    this.logger.log(`getUserInfo : ${userIdx}, ${intra}, ${img}, ${accessToken}, ${email}`);
     let user: UserObject | CreateUsersDto = await this.usersService.findOneUser(userIdx);
     if (user === null || user === undefined) {
       const newUser: CreateUsersDto = {
-        userIdx,
+        userIdx : userIdx,
         intra: intra,
         nickname : intra,
-        imgUri: imgUri,
+        img: img,
         certificate: null,
         email: null,
       };
-      user = await this.usersService.createUser(newUser);
-      this.logger.log('createUser called');
       const savedtoken = await this.usersService.saveToken({
         token: accessToken,
         check2Auth: false,
@@ -103,6 +112,10 @@ export class LoginService {
         userIdx: userIdx,
       });
       this.logger.log(`saveToken called : ${savedtoken}`);
+      newUser.certificate = savedtoken;
+      user = await this.usersService.createUser(newUser);
+      this.logger.log('createUser called');
+      
     }
 
     return {
