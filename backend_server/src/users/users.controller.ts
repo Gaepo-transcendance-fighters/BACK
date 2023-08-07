@@ -58,11 +58,11 @@ export class UsersController {
       this.logger.log('codeCallback');
     this.logger.log('query check: ',query);
     res.header('Cache-Control', 'no-store');
-    // const { userIdx, intra, email, imgUri, accessToken, refreshToken } = req.user;
+    // const { userIdx, intra, email, img, accessToken, refreshToken } = req.user;
     // const intraInfo = await this.authService.getIntraInfo(query);
 
     // user.userIdx = req.user.userIdx;
-    // const payload = await this.authService.getTokenInfo({userIdx, imgUri});
+    // const payload = await this.authService.getTokenInfo({userIdx, img});
     // res.cookie('token', this.authService.issueToken(payload));
     
 

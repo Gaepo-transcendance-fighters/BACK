@@ -122,7 +122,7 @@ export class ChatGateway
       client.disconnect();
     }
     const userObject = {
-      imgUri: user.imgUri,
+      img: user.img,
       nickname: user.nickname,
       userIdx: user.userIdx,
     };
