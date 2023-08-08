@@ -16,11 +16,10 @@ import { Channel } from './class/channel.class';
 import { Chat, MessageInfo } from './class/chat.class';
 import { UsersService } from 'src/users/users.service';
 import { chatCreateRoomReqDto } from './dto/chat.dto';
-import { Mode } from './entities/chat.entity';
 import { InMemoryUsers } from 'src/users/users.provider';
-import { UserObject } from 'src/users/entities/users.entity';
 import { Client } from 'socket.io/dist/client';
 import { SendDMDto } from './dto/send-dm.dto';
+import { UserObject } from 'src/users/entity/users.entity';
 
 @WebSocketGateway({
   namespace: 'chat',

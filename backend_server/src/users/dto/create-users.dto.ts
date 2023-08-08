@@ -5,7 +5,7 @@ import {
   Matches,
   IsNotEmpty,
 } from 'class-validator';
-import { CertificateObject } from '../entities/certificate.entity';
+import { CertificateObject } from '../entity/certificate.entity';
 
 export class CreateUsersDto {
   constructor(userIdx: number, intra: string, nickname: string, imgUri: string, certificate: CertificateObject, email: string) {

@@ -19,8 +19,8 @@ import { IntraInfoDto } from 'src/users/dto/user.dto';
 import { UsersService } from 'src/users/users.service';
 import { CreateCertificateDto } from 'src/auth/dto/auth.dto';
 import { plainToClass } from 'class-transformer';
-import { CertificateObject } from 'src/users/entities/certificate.entity';
-import { UserObject } from 'src/users/entities/users.entity';
+import { CertificateObject } from 'src/users/entity/certificate.entity';
+import { UserObject } from 'src/users/entity/users.entity';
 
 
 @Controller()

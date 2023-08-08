@@ -1,4 +1,4 @@
-import { UserObject } from 'src/users/entities/users.entity';
+import { UserObject } from 'src/users/entity/users.entity';
 import {
   BaseEntity,
   Entity,

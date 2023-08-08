@@ -8,7 +8,7 @@ import { JwtPayloadDto } from 'src/auth/dto/auth.dto';
 import { IntraInfoDto } from 'src/users/dto/user.dto';
 import { CreateUsersDto } from 'src/users/dto/create-users.dto';
 
-import { UserObject } from 'src/users/entities/users.entity';
+import { UserObject } from 'src/users/entity/users.entity';
 import { UsersService } from 'src/users/users.service';
 
 dotenv.config({
