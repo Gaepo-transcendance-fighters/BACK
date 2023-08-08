@@ -1,8 +1,8 @@
-import { UserObject } from "src/users/entities/users.entity";
+import { UserObject } from "src/users/entity/users.entity";
 
 export interface IntraInfoDto {
     userIdx : number;
-    img: string;
+    imgUri: string;
   }
 export interface JwtPayloadDto {
   id: number;

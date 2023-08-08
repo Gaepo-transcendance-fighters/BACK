@@ -5,15 +5,16 @@ import { BlockTargetDto } from './dto/block-target.dto';
 import { v4 as uuidv4 } from 'uuid';
 import { BlockListRepository } from './blockList.repository';
 import { FriendListRepository } from './friendList.repository';
-import { CertificateRepository } from './certificate.repository';
-import { UserObject } from './entities/users.entity';
+import { UserObject } from './entity/users.entity';
 import { InsertFriendDto } from './dto/insert-friend.dto';
 import { HttpService } from '@nestjs/axios';
+import axios from 'axios';
 import { firstValueFrom, lastValueFrom } from 'rxjs';
 import { response } from 'express';
-import { CertificateObject } from './entities/certificate.entity';
+import { CertificateObject } from './entity/certificate.entity';
 import { CreateCertificateDto, IntraInfoDto, JwtPayloadDto } from 'src/auth/dto/auth.dto';
 import { Socket } from 'socket.io';
+import { CertificateRepository } from './certificate.repository';
 
 const intraApiMyInfoUri = 'https://api.intra.42.fr/v2/me';
 @Injectable()
@@ -24,9 +25,9 @@ export class UsersService {
     private blockedListRepository: BlockListRepository,
     private friendListRepository: FriendListRepository,
     private certificateRepository: CertificateRepository,
-  ) {}
+  ) { }
 
-  
+
   private logger: Logger = new Logger('UsersService');
 
   async signUp(createUsersDto: CreateUsersDto): Promise<string> {
@@ -53,13 +54,13 @@ export class UsersService {
   }
 
   async getTokenInfo(accessToken: string) {
-    return await this.certificateRepository.findOneBy( {token : accessToken});
+    return await this.certificateRepository.findOneBy({ token: accessToken });
   }
   async saveToken(createCertificateDto: CreateCertificateDto): Promise<CertificateObject> {
     return await this.certificateRepository.save(createCertificateDto);
   };
 
-  
+
 
   async blockTarget(
     blockTarget: BlockTargetDto,
@@ -88,13 +89,13 @@ export class UsersService {
   }
 
   async createUser(createUsersDto: CreateUsersDto): Promise<UserObject> {
-    const { userIdx, intra, nickname, img } = createUsersDto;
+    const { userIdx, intra, nickname, imgUri } = createUsersDto;
 
     let user = this.userObjectRepository.create({
       userIdx: userIdx,
       intra: intra,
       nickname: intra,
-      img: img,
+      imgUri: imgUri,
       rankpoint: 0,
       isOnline: true,
       available: true,
@@ -133,7 +134,7 @@ export class UsersService {
           userIdx : response.data.id,
           intra: response.data.login,
           nickname: response.data.login,
-          img: response.data.image.link,
+          imgUri: response.data.image.link,
           certificate: response.data.accessToken,
           email: response.data.email,
         });
@@ -154,66 +155,68 @@ export class UsersService {
     return null;
   }
   */
-  async validateUser(accessToken: string) : Promise<UserObject> {
+  async validateUser(accessToken: string): Promise<UserObject> {
     this.logger.log('validateUser function');
     this.logger.log(accessToken);
-    const response = await lastValueFrom(
-      this.httpService.get(intraApiMyInfoUri, {
+    try {
+      const response = await axios.get(intraApiMyInfoUri, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
-      }),
-    ).catch(function (error) {
-      if (error.response) {
-        this.logger.log(`error.response.status : ${error.response.status}`);
-        // 요청이 이루어졌으며 서버가 2xx의 범위를 벗어나는 상태 코드로 응답했습니다.
-        throw new ForbiddenException(
-          '사용자의 토큰이 만료되었거나 유효하지 않습니다.',
-        );
-      }
-    }
-    );
-    if (response) {
-      this.logger.log(`response.data.id : ${response.data.id}`);
+      });
+      this.logger.log(`getIntraInfo: response.data.access_token : ${response.data.access_token}`)
 
-      let existedUser:UserObject = await this.findOneUser(response.data.id);
-      this.logger.log(`user : ${existedUser}`)
-      if (existedUser) {
-        this.logger.log('user exist');
-        return existedUser;
-      } else {
-        this.logger.log(`user create start`);
-        const user = await this.userObjectRepository.createUser({
-          userIdx : response.data.id,
-          intra: response.data.login,
-          nickname: response.data.login,
-          img: response.data.image.link,
-          certificate: response.data.accessToken,
-          email: response.data.email,
-        });
-        this.logger.log(`user create end ${user}, certi insert start`);
-        const certi = await this.certificateRepository.insertCertificate(
-          response.data.accessToken,
-          false,
-          response.data.email,
-          response.data.Id,
-        )
-        if (certi == null) {
-          this.logger.log('서버에 문제가 발생했습니다.');
+      const userInfo = response;
+      console.log(userInfo);
+      // 이제 userInfo를 사용하여 원하는 작업을 수행할 수 있습니다.
+      this.logger.log(`getIntraInfo: userInfo : ${userInfo.data.id}, ${userInfo.data.image.versions.small}`);
+      if (userInfo) {
+        this.logger.log(`response.data.id : ${response.data.id}`);
+
+        let existedUser: UserObject = await this.findOneUser(response.data.id);
+        this.logger.log(`user : ${existedUser}`)
+        if (existedUser) {
+          this.logger.log('user exist');
+          return existedUser;
+        } else {
+          this.logger.log(`user create start`);
+          const user = await this.userObjectRepository.createUser({
+            userIdx: response.data.id,
+            intra: response.data.login,
+            nickname: response.data.login,
+            imgUri: response.data.image.link,
+            certificate: response.data.accessToken,
+            email: response.data.email,
+          });
+          this.logger.log(`user create end ${user}, certi insert start`);
+          const certi = await this.certificateRepository.insertCertificate(
+            response.data.accessToken,
+            false,
+            response.data.email,
+            response.data.Id,
+          )
+          if (certi == null) {
+            this.logger.log('서버에 문제가 발생했습니다.');
+          }
+          console.log('certificate insert', certi);
+          return user;
         }
-        console.log('certificate insert', certi);
-        return user;
       }
+      return null;
+
+    } catch (error) {
+      // 에러 핸들링
+      console.error('Error making GET request:', error);
     }
-    return null;
   }
+
 
   async createCertificate(
     createCertificateDto: CreateCertificateDto,
     user: UserObject,
     email: string,
   ): Promise<CertificateObject> {
-    
+
     return this.certificateRepository.insertCertificate(
       createCertificateDto.token,
       true,

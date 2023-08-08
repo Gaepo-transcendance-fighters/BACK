@@ -1,5 +1,4 @@
-import { channel } from 'diagnostics_channel';
-import { UserObject } from 'src/users/entities/users.entity';
+import { UserObject } from 'src/users/entity/users.entity';
 import {
   BaseEntity,
   Column,

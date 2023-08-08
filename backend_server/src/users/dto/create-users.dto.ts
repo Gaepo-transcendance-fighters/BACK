@@ -5,14 +5,14 @@ import {
   Matches,
   IsNotEmpty,
 } from 'class-validator';
-import { CertificateObject } from '../entities/certificate.entity';
+import { CertificateObject } from '../entity/certificate.entity';
 
 export class CreateUsersDto {
-  constructor(userIdx: number, intra: string, nickname: string, img: string, certificate: CertificateObject, email: string) {
+  constructor(userIdx: number, intra: string, nickname: string, imgUri: string, certificate: CertificateObject, email: string) {
     this.userIdx = userIdx;
     this.intra = intra;
     this.nickname = nickname;
-    this.img = img;
+    this.imgUri = imgUri;
     this.certificate = certificate;
     this.email = email;
   } 
@@ -26,7 +26,7 @@ export class CreateUsersDto {
   @Matches(/^[a-zA-Z0-9]*$/, { message: 'intra is unique' })
   intra: string;
   nickname: string;
-  img: string;
+  imgUri: string;
   certificate: CertificateObject;
   email: string;
 }

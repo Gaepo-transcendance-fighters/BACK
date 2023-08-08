@@ -19,8 +19,8 @@ import { IntraInfoDto } from 'src/users/dto/user.dto';
 import { UsersService } from 'src/users/users.service';
 import { CreateCertificateDto } from 'src/auth/dto/auth.dto';
 import { plainToClass } from 'class-transformer';
-import { CertificateObject } from 'src/users/entities/certificate.entity';
-import { UserObject } from 'src/users/entities/users.entity';
+import { CertificateObject } from 'src/users/entity/certificate.entity';
+import { UserObject } from 'src/users/entity/users.entity';
 
 
 @Controller()
@@ -43,7 +43,7 @@ export class LoginController {
   }
 
   @Post('login/auth')
-  async codeCallback(@Headers('authorization') authHeader: any, @Req() req:Request, @Res() res: any, @Body() query: any){
+  async codeCallback(@Headers('authorization') authHeader: any, @Req() req:Request, @Res() res: Response, @Body() query: any) {
     if (authHeader === undefined) {
       // authHeader =  req.cookies.Authentication;
       //
@@ -78,7 +78,6 @@ export class LoginController {
     this.logger.log(`codeCallback req.headers.cookie : ${req.headers.cookie}`);
     this.logger.log(`codeCallback req.body : ${req.body}`);
     this.logger.log(`codeCallback req.cookies : ${req.cookies}`)
-    this.logger.log(`codeCallback req.cookies : ${req.body}`);
     authHeader = req.headers.authorization.startsWith('Bearer') ? req.headers.authorization.split(' ')[1] : req.headers.authorization;
     if (authHeader === "null" || authHeader === "undefined" ) {
       this.logger.log('codeCallback authHeader null');
@@ -87,12 +86,15 @@ export class LoginController {
     this.logger.log(`codeCallback authHeader : ${authHeader}`);
     userDto = await this.usersService.validateUser(authHeader);
     
-    this.logger.log(`codeCallback userDto : ${userDto}`)
-    // { userIdx, intra, img, accessToken, email }
-    intraInfo.img = userDto.img;
+    this.logger.log(`codeCallback userDto :`);
+    console.log(userDto);
+
+    // { userIdx, intra, imgUri, accessToken, email }
+    intraInfo.imgUri = userDto.imgUri;
     intraInfo.accessToken = userDto.certificate.token;
-    intraInfo.email = userDto.certificate.email;
-    this.logger.log(`codeCallback intraInfo : ${intraInfo}`)
+    intraInfo.email = intraInfo.email;
+    // this.logger.log(`codeCallback intraInfo : ${intraInfo}`)
+    console.log("codeCallback intraInfo",intraInfo);
     }
     const userInfo = await this.loginService.getUserInfo(intraInfo);
 
@@ -100,15 +102,20 @@ export class LoginController {
     userData.user = await this.usersService.findOneUser(userInfo.id);
     const createdCertificateDto: CreateCertificateDto = {token:userInfo.accessToken, check2Auth: false, email: intraInfo.email, userIdx: userInfo.id};
     userData.token = await this.usersService.saveToken(createdCertificateDto);
-    this.logger.log(`check userData isExist : ${userData.token.token}`); 
+    this.logger.log(`check userData.token.token isExist : ${userData.token.token}`); 
     this.logger.log('codeCallback end accessToken', userInfo.accessToken);
     
-    this.logger.log(`res.header : ${res.header}`);
-    this.logger.log(`res.headers : ${res.headers}`);
+    // this.logger.log(`res.header : \n${res.header}`); // just function
+    // this.logger.log(`res.headers : ${res.headers}`); // [res.headers : undefined]
     // this.logger.log('res.headers.cookie', res.headers.cookie);
-    this.logger.log(`res.headers.authorization :  ${res.headers.authorization}`);
-    this.logger.log(`res.body : ${res.body}`);
-    return res.redirect(`${process.env.FRONTEND_URI}/login?token=${userData.token.token}`);
+    // this.logger.log(`res.headers.authorization :  ${res.headers.authorization}`);
+    // this.logger.log(`res.body : ${res.body}`); // [res.body : undefined]
+    const resp :Response =res;
+    // resp.cookie('token', userData.token.token, { httpOnly: true, path: '/' });
+    resp.setHeader('Set-Cookie', `Authentication=${userData.token.token}; `);
+    console.log(resp);
+    
+    return res.status(200).json({ code:userData.token.token ,message: '로그인 성공' });
   }
 
   @Post('logout')

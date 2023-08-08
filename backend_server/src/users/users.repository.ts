@@ -1,18 +1,18 @@
 import { Repository } from 'typeorm'; // EntityRepository 가 deprecated 되어 직접 호출함
-import { UserObject } from './entities/users.entity';
+import { UserObject } from './entity/users.entity';
 import { CreateUsersDto } from './dto/create-users.dto';
 import { CustomRepository } from 'src/typeorm-ex.decorator';
 
 @CustomRepository(UserObject)
 export class UserObjectRepository extends Repository<UserObject> {
   async createUser(createUsersDto: CreateUsersDto): Promise<UserObject> {
-    const { userIdx, intra, nickname, img } = createUsersDto;
+    const { userIdx, intra, nickname, imgUri } = createUsersDto;
 
     let user = this.create({
       userIdx: userIdx,
       intra: intra,
       nickname: nickname,
-      img: img,
+      imgUri: imgUri,
       rankpoint: 0,
       isOnline: true,
       available: true,
