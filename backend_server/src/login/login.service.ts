@@ -45,9 +45,9 @@ export class LoginService {
   
     try {
       const response = await axios.post(intraApiTokenUri, body);
-      console.log(response)
-      this.logger.log(`getToken: response.data : ${response.data}`)
-      this.logger.log(`getToken: response.data.message : ${response.data.message}`)
+      console.log("trying get response from axios post : ",response)
+      // this.logger.log(`getToken: response.data : ${response.data}`) // [object Object]
+      // this.logger.log(`getToken: response.data.message : ${response.data.message}`) // undefined
       this.logger.log(`getToken: response.data.access_token : ${response.data.access_token}`)
       return response.data.access_token;
     } catch (error) {
@@ -78,11 +78,13 @@ export class LoginService {
         headers: {
           Authorization: `Bearer ${tokens}`,
         },
+          timeout: 10000,
       });
-      this.logger.log(`getIntraInfo: response.data.access_token : ${response.data.access_token}`)
+      this.logger.log(`getIntraInfo: response.data.access_token : [data : undefined] : ${response.data.access_token}`)
+      this.logger.log(`getIntraInfo: Not response.data.access_token, but tokens   : ${tokens}`)
       
       const userInfo = response;
-      console.log(userInfo);
+      console.log('userInfo : Logging :',userInfo);
       // 이제 userInfo를 사용하여 원하는 작업을 수행할 수 있습니다.
       this.logger.log(`getIntraInfo: userInfo : ${userInfo.data.id}, ${userInfo.data.image.versions.small}`);
     
@@ -90,7 +92,7 @@ export class LoginService {
       userIdx: userInfo.data.id,
       intra: userInfo.data.login,
       img: userInfo.data.image.versions.small,
-      accessToken : userInfo.data.access_token,
+      accessToken : tokens,
       email: userInfo.data.email,
     };
     } catch (error) {
