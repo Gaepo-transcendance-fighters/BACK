@@ -78,7 +78,6 @@ export class LoginService {
         headers: {
           Authorization: `Bearer ${tokens}`,
         },
-          timeout: 10000,
       });
       this.logger.log(`getIntraInfo: response.data.access_token : [data : undefined] : ${response.data.access_token}`)
       this.logger.log(`getIntraInfo: Not response.data.access_token, but tokens   : ${tokens}`)
