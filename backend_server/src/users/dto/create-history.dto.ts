@@ -1,5 +1,5 @@
 import { IsNotEmpty } from 'class-validator';
-import { HistoriesType, ResultType } from '../entities/users.entity';
+import { HistoriesType, ResultType } from '../entity/users.entity';
 
 export class CreateHistoryDto {
   @IsNotEmpty()

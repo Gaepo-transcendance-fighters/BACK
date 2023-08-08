@@ -4,7 +4,7 @@ import { Chat } from './class/chat.class';
 import { Socket } from 'socket.io';
 import { error } from 'console';
 import { DataSource } from 'typeorm';
-import { UserObject } from 'src/users/entities/users.entity';
+import { UserObject } from 'src/users/entity/users.entity';
 import { DMChannel, DirectMessage, Mode } from './entities/chat.entity';
 import { DMChannelRepository, DirectMessageRepository } from './DM.repository';
 import { SendDMDto } from './dto/send-dm.dto';

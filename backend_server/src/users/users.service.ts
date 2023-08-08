@@ -5,7 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { BlockTargetDto } from './dto/block-target.dto';
 import { BlockListRepository } from './blockList.repository';
 import { FriendListRepository } from './friendList.repository';
-import { UserObject } from './entities/users.entity';
+import { UserObject } from './entity/users.entity';
 import { InsertFriendDto } from './dto/insert-friend.dto';
 
 @Injectable()
