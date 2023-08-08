@@ -1,26 +1,25 @@
 import { Repository } from 'typeorm'; // EntityRepository 가 deprecated 되어 직접 호출함
 import { CustomRepository } from 'src/typeorm-ex.decorator';
-import { UserObject } from './entity/users.entity';
 import { CertificateObject } from './entity/certificate.entity';
-import { CreateCertificateDto } from './dto/create-certification.dto';
 
 @CustomRepository(CertificateObject)
 export class CertificateRepository extends Repository<CertificateObject> {
   async insertCertificate(
-    tokenDto: CreateCertificateDto,
-    user: UserObject,
-    oauth2nd: boolean,
-  ): Promise<boolean> {
-    const { token } = tokenDto;
+    token: string,
+    check2Auth: boolean,
+    email: string,
+    userIdx: number,
+  ){
 
     const certificate = this.create({
       token: token,
-      userIdx: user.userIdx,
-      check2Auth: oauth2nd,
+      userIdx: userIdx,
+      check2Auth: check2Auth,
+      email: email,
     });
 
-    await this.save(certificate);
+    const auth = await this.save(certificate);
 
-    return true;
+    return auth;
   }
 }

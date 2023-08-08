@@ -5,23 +5,37 @@ import { CustomRepository } from 'src/typeorm-ex.decorator';
 
 @CustomRepository(UserObject)
 export class UserObjectRepository extends Repository<UserObject> {
-  async createUser(createUsersDto: CreateUsersDto): Promise<string> {
-    const { intra } = createUsersDto;
+  async createUser(createUsersDto: CreateUsersDto): Promise<UserObject> {
+    const { userIdx, intra, nickname, imgUri } = createUsersDto;
 
-    const user = this.create({
+    let user = this.create({
+      userIdx: userIdx,
       intra: intra,
-      nickname: intra,
+      nickname: nickname,
+      imgUri: imgUri,
       rankpoint: 0,
       isOnline: true,
       available: true,
       win: 0,
       lose: 0,
     });
+    user = await this.save(user);
 
-    await this.save(user);
-
-    return user.intra;
+    return user;
   }
+
+  async findUserByIntra(intra: string): Promise<UserObject> {
+    const user = await this.findOne({ where: { intra: intra } });
+    return user;
+  }
+
+
+  async setIsOnline(user: UserObject, isOnline: boolean): Promise<boolean> {
+    user.isOnline = isOnline;
+    await this.update(user.userIdx, { isOnline: user.isOnline });
+    return user.isOnline;
+  }
+
 }
 
 // @CustomRepository(Histories)
