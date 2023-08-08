@@ -15,7 +15,6 @@ export class CertificateRepository extends Repository<CertificateObject> {
       token: token,
       userIdx: userIdx,
       check2Auth: check2Auth,
-      email: email,
     });
 
     const auth = await this.save(certificate);
