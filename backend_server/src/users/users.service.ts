@@ -15,6 +15,7 @@ import { Socket } from 'socket.io';
 import { CertificateRepository } from './certificate.repository';
 import { UserObject } from './entity/users.entity';
 import { CertificateObject } from './entity/certificate.entity';
+import { FriendList } from './entity/friendList.entity';
 
 const intraApiMyInfoUri = 'https://api.intra.42.fr/v2/me';
 @Injectable()
@@ -80,7 +81,7 @@ export class UsersService {
   async addFriend(
     insertFriendDto: InsertFriendDto,
     user: UserObject,
-  ): Promise<string> {
+  ): Promise<FriendList[]> {
     return this.friendListRepository.insertFriend(
       insertFriendDto,
       user,

@@ -9,6 +9,7 @@ import { CertificateRepository } from './certificate.repository';
 import { HttpModule } from '@nestjs/axios';
 // import { JwtModule } from '@nestjs/jwt';
 import { AuthModule } from 'src/auth/auth.module';
+import { UsersGateway } from './users.gateway';
 
 @Module({
   imports: [
@@ -23,7 +24,7 @@ import { AuthModule } from 'src/auth/auth.module';
     forwardRef(() => AuthModule),
   ],
   controllers: [UsersController],
-  providers: [UsersService],
+  providers: [UsersService, UsersGateway],
   exports: [UsersService],
 })
 export class UsersModule {}
