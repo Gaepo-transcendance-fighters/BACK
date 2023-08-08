@@ -92,7 +92,7 @@ export class LoginController {
     // { userIdx, intra, imgUri, accessToken, email }
     intraInfo.imgUri = userDto.imgUri;
     intraInfo.accessToken = userDto.certificate.token;
-    intraInfo.email = userDto.certificate.email;
+    intraInfo.email = intraInfo.email;
     // this.logger.log(`codeCallback intraInfo : ${intraInfo}`)
     console.log("codeCallback intraInfo",intraInfo);
     }
