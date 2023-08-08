@@ -91,7 +91,7 @@ export class LoginService {
     return {
       userIdx: userInfo.data.id,
       intra: userInfo.data.login,
-      img: userInfo.data.image.versions.small,
+      imgUri: userInfo.data.image.versions.small,
       accessToken : tokens,
       email: userInfo.data.email,
     };
@@ -123,22 +123,22 @@ export class LoginService {
     /* 
     userIdx: number;
     intra: string;
-    img: string;
+    imgUri: string;
     accessToken: string;
     email: string; 
     */
   //  const dto = new CreateUsersDto(id, username, username, image );
-    // const intrainfoDto = new IntraInfoDto( userIdx, intra, img, accessToken, email );
+    // const intrainfoDto = new IntraInfoDto( userIdx, intra, imgUri, accessToken, email );
     
     const intraInfoDto: IntraInfoDto = {
       userIdx: intraInfo.userIdx,
       intra: intraInfo.intra,
-      img: intraInfo.img,
+      imgUri: intraInfo.imgUri,
       accessToken: intraInfo.accessToken,
       email: intraInfo.email,
     };
-    const { userIdx, intra, img, accessToken, email } = intraInfoDto;
-    this.logger.log(`getUserInfo : ${userIdx}, ${intra}, ${img}, ${accessToken}, ${email}`);
+    const { userIdx, intra, imgUri, accessToken, email } = intraInfoDto;
+    this.logger.log(`getUserInfo : ${userIdx}, ${intra}, ${imgUri}, ${accessToken}, ${email}`);
     let user: UserObject | CreateUsersDto = await this.usersService.findOneUser(userIdx);
     if (user === null || user === undefined) {
       
@@ -152,7 +152,7 @@ export class LoginService {
         userIdx : userIdx,
         intra: intra,
         nickname : intra,
-        img: img,
+        imgUri: imgUri,
         certificate: savedtoken,
         email: email,
       };

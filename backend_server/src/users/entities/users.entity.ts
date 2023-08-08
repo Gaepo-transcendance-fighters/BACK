@@ -26,7 +26,7 @@ export class UserObject extends BaseEntity {
   nickname: string;
 
   @Column()
-  img: string;
+  imgUri: string;
 
   @Column()
   rankpoint: number;

@@ -89,13 +89,13 @@ export class UsersService {
   }
 
   async createUser(createUsersDto: CreateUsersDto): Promise<UserObject> {
-    const { userIdx, intra, nickname, img } = createUsersDto;
+    const { userIdx, intra, nickname, imgUri } = createUsersDto;
 
     let user = this.userObjectRepository.create({
       userIdx: userIdx,
       intra: intra,
       nickname: intra,
-      img: img,
+      imgUri: imgUri,
       rankpoint: 0,
       isOnline: true,
       available: true,
@@ -134,7 +134,7 @@ export class UsersService {
           userIdx : response.data.id,
           intra: response.data.login,
           nickname: response.data.login,
-          img: response.data.image.link,
+          imgUri: response.data.image.link,
           certificate: response.data.accessToken,
           email: response.data.email,
         });
@@ -184,7 +184,7 @@ export class UsersService {
             userIdx: response.data.id,
             intra: response.data.login,
             nickname: response.data.login,
-            img: response.data.image.link,
+            imgUri: response.data.image.link,
             certificate: response.data.accessToken,
             email: response.data.email,
           });
