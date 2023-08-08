@@ -106,13 +106,14 @@ export class LoginController {
     this.logger.log(`res.header : ${res.header}`);
     this.logger.log(`res.headers : ${res.headers}`);
     // this.logger.log('res.headers.cookie', res.headers.cookie);
-    this.logger.log(`res.headers.authorization :  ${res.headers.authorization}`);
+    // this.logger.log(`res.headers.authorization :  ${res.headers.authorization}`);
     this.logger.log(`res.body : ${res.body}`);
     return res.redirect(`${process.env.FRONTEND_URI}/login?token=${userData.token.token}`);
   }
 
   @Post('logout')
   @Header('Set-Cookie', 'Authentication=; Path=/; HttpOnly; Max-Age=0')
+  @Redirect('https://signin.intra.42.fr/users/sign_out', 301)
   logout() {
     this.logger.log('logout');
     return { message: '로그아웃 되었습니다.' };
