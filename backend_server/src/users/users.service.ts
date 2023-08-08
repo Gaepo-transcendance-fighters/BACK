@@ -5,16 +5,16 @@ import { BlockTargetDto } from './dto/block-target.dto';
 import { v4 as uuidv4 } from 'uuid';
 import { BlockListRepository } from './blockList.repository';
 import { FriendListRepository } from './friendList.repository';
-import { UserObject } from './entity/users.entity';
 import { InsertFriendDto } from './dto/insert-friend.dto';
 import { HttpService } from '@nestjs/axios';
 import axios from 'axios';
 import { firstValueFrom, lastValueFrom } from 'rxjs';
 import { response } from 'express';
-import { CertificateObject } from './entity/certificate.entity';
 import { CreateCertificateDto, IntraInfoDto, JwtPayloadDto } from 'src/auth/dto/auth.dto';
 import { Socket } from 'socket.io';
 import { CertificateRepository } from './certificate.repository';
+import { UserObject } from './entity/users.entity';
+import { CertificateObject } from './entity/certificate.entity';
 
 const intraApiMyInfoUri = 'https://api.intra.42.fr/v2/me';
 @Injectable()

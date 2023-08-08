@@ -5,6 +5,7 @@ import {
   PrimaryGeneratedColumn,
   OneToOne,
   PrimaryColumn,
+  Unique,
 } from 'typeorm';
 import { UserObject } from './users.entity';
 
@@ -14,6 +15,7 @@ export class CertificateObject extends BaseEntity {
   token: string;
 
   @Column()
+  @Unique(['userIdx'])
   userIdx: number;
 
   @Column()

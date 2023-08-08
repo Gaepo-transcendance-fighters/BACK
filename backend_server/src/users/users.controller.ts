@@ -20,7 +20,7 @@ import { CreateUsersDto } from './dto/create-users.dto';
 import { AuthService,} from 'src/auth/auth.service';
 import { AuthGuard } from '@nestjs/passport';
 import { plainToClass } from 'class-transformer';
-import { UserObject } from './entities/users.entity';
+import { UserObject } from './entity/users.entity';
 
 
 @Controller()

@@ -19,8 +19,8 @@ import { IntraInfoDto } from 'src/users/dto/user.dto';
 import { UsersService } from 'src/users/users.service';
 import { CreateCertificateDto } from 'src/auth/dto/auth.dto';
 import { plainToClass } from 'class-transformer';
-import { CertificateObject } from 'src/users/entities/certificate.entity';
-import { UserObject } from 'src/users/entities/users.entity';
+import { CertificateObject } from 'src/users/entity/certificate.entity';
+import { UserObject } from 'src/users/entity/users.entity';
 
 
 @Controller()
@@ -43,7 +43,7 @@ export class LoginController {
   }
 
   @Post('login/auth')
-  async codeCallback(@Headers('authorization') authHeader: any, @Req() req:Request, @Res() res: any, @Body() query: any){
+  async codeCallback(@Headers('authorization') authHeader: any, @Req() req:Request, @Res() res: Response, @Body() query: any) {
     if (authHeader === undefined) {
       // authHeader =  req.cookies.Authentication;
       //
@@ -106,20 +106,20 @@ export class LoginController {
     this.logger.log('codeCallback end accessToken', userInfo.accessToken);
     
     // this.logger.log(`res.header : \n${res.header}`); // just function
-    this.logger.log(`res.headers : ${res.headers}`); // [res.headers : undefined]
+    // this.logger.log(`res.headers : ${res.headers}`); // [res.headers : undefined]
     // this.logger.log('res.headers.cookie', res.headers.cookie);
     // this.logger.log(`res.headers.authorization :  ${res.headers.authorization}`);
-    this.logger.log(`res.body : ${res.body}`); // [res.body : undefined]
+    // this.logger.log(`res.body : ${res.body}`); // [res.body : undefined]
     const resp :Response =res;
-    resp.cookie('token', userData.token.token, { maxAge: 86400, httpOnly: true, path: '/' });
-    resp.setHeader('Set-Cookie', `Authentication=${userData.token.token}; Path=/; Max-Age=86400`);
+    // resp.cookie('token', userData.token.token, { httpOnly: true, path: '/' });
+    resp.setHeader('Set-Cookie', `Authentication=${userData.token.token}; `);
     console.log(resp);
-    return ;
+    
+    return res.status(200).json({ code:userData.token.token ,message: '로그인 성공' });
   }
 
   @Post('logout')
   @Header('Set-Cookie', 'Authentication=; Path=/; HttpOnly; Max-Age=0')
-  @Redirect('https://signin.intra.42.fr/users/sign_out', 301)
   logout() {
     this.logger.log('logout');
     return { message: '로그아웃 되었습니다.' };

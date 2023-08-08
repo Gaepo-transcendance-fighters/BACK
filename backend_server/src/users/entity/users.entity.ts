@@ -10,7 +10,7 @@ import {
 import { FriendList } from './friendList.entity';
 import { BlockList } from './blockList.entity';
 import { CertificateObject } from './certificate.entity';
-import { DMChannel } from 'src/chat/entities/chat.entity';
+import { DMChannel } from 'src/chat/entity/chat.entity';
 import { GameRecord } from 'src/game/entity/gameRecord.entity';
 import { GameChannel } from 'src/game/entity/gameChannel.entity';
 
