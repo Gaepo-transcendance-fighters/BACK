@@ -45,7 +45,7 @@ export class LoginService {
   
     try {
       const response = await axios.post(intraApiTokenUri, body);
-      console.log("trying get response from axios post : ",response)
+      // console.log("trying get response from axios post : ",response) // 이건 200 성공으로 모든 정보가 담긴 response
       // this.logger.log(`getToken: response.data : ${response.data}`) // [object Object]
       // this.logger.log(`getToken: response.data.message : ${response.data.message}`) // undefined
       this.logger.log(`getToken: response.data.access_token : ${response.data.access_token}`)
@@ -79,20 +79,21 @@ export class LoginService {
           Authorization: `Bearer ${tokens}`,
         },
       });
-      this.logger.log(`getIntraInfo: response.data.access_token : [data : undefined] : ${response.data.access_token}`)
-      this.logger.log(`getIntraInfo: Not response.data.access_token, but tokens   : ${tokens}`)
+      this.logger.log(`getIntraInfo: response.data.accessToken : ${response.data.accessToken}`);
+      this.logger.log(`getIntraInfo: Not response.data.accessToken, but tokens   : ${tokens}`);
       
-      const userInfo = response;
-      console.log('userInfo : Logging :',userInfo);
+      const userInfo = response.data;
+      // console.log(`getIntraInfo: userInfo : `,userInfo); // too many
+      // console.log('userInfo : Logging :',userInfo);
       // 이제 userInfo를 사용하여 원하는 작업을 수행할 수 있습니다.
-      this.logger.log(`getIntraInfo: userInfo : ${userInfo.data.id}, ${userInfo.data.image.versions.small}`);
+      this.logger.log(`getIntraInfo: userInfo : ${userInfo.id}, ${userInfo.image.versions.small}`);
     
     return {
-      userIdx: userInfo.data.id,
-      intra: userInfo.data.login,
-      imgUri: userInfo.data.image.versions.small,
+      userIdx: userInfo.id,
+      intra: userInfo.login,
+      imgUri: userInfo.image.versions.small,
       accessToken : tokens,
-      email: userInfo.data.email,
+      email: userInfo.email,
     };
     } catch (error) {
       // 에러 핸들링
@@ -140,7 +141,13 @@ export class LoginService {
     this.logger.log(`getUserInfo : ${userIdx}, ${intra}, ${imgUri}, ${accessToken}, ${email}`);
     let user: UserObject | CreateUsersDto = await this.usersService.findOneUser(userIdx);
     if (user === null || user === undefined) {
+      /*
+        token: string;
+        check2Auth: boolean;
+        email: string;
+        userIdx: number; 
       
+       */
       const savedtoken = await this.usersService.saveToken({
         token: accessToken,
         check2Auth: false,
