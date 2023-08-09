@@ -79,20 +79,21 @@ export class LoginService {
           Authorization: `Bearer ${tokens}`,
         },
       });
-      this.logger.log(`getIntraInfo: response.data.access_token : [data : undefined] : ${response.data.access_token}`)
-      this.logger.log(`getIntraInfo: Not response.data.access_token, but tokens   : ${tokens}`)
+      this.logger.log(`getIntraInfo: response.data.access_token : ${response.data.access_token}`);
+      this.logger.log(`getIntraInfo: Not response.data.access_token, but tokens   : ${tokens}`);
       
-      const userInfo = response;
-      console.log('userInfo : Logging :',userInfo);
+      const userInfo = response.data;
+      console.log(`getIntraInfo: userInfo : ${userInfo}`);
+      // console.log('userInfo : Logging :',userInfo);
       // 이제 userInfo를 사용하여 원하는 작업을 수행할 수 있습니다.
-      this.logger.log(`getIntraInfo: userInfo : ${userInfo.data.id}, ${userInfo.data.image.versions.small}`);
+      this.logger.log(`getIntraInfo: userInfo : ${userInfo.id}, ${userInfo.image.versions.small}`);
     
     return {
-      userIdx: userInfo.data.id,
-      intra: userInfo.data.login,
-      imgUri: userInfo.data.image.versions.small,
+      userIdx: userInfo.id,
+      intra: userInfo.login,
+      imgUri: userInfo.image.versions.small,
       accessToken : tokens,
-      email: userInfo.data.email,
+      email: userInfo.email,
     };
     } catch (error) {
       // 에러 핸들링

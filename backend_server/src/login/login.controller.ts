@@ -42,10 +42,22 @@ export class LoginController {
     return;
   }
 
+  @Get('login/test')
+  async test(@Body() body: any) {
+
+    const date = body.date;
+    console.log(`test : ${date}`);
+    return date;
+
+  }
   @Post('login/auth')
   async codeCallback(@Headers('authorization') authHeader: any, @Req() req:Request, @Res() res: Response, @Body() query: any) {
-    if (authHeader === undefined) {
-      // authHeader =  req.cookies.Authentication;
+    console.log('codeCallback start : authHeader', authHeader);
+    // if (!req.cookies.Authentication) {
+      // console.log('codeCallback start : req.cookies', req.cookies);
+    // }
+    if (authHeader === undefined  || authHeader === null) {
+      authHeader = req.cookies.Authentication;
       //
 
       // doesn't work res:any in case
@@ -58,7 +70,10 @@ export class LoginController {
     // this.logger.log(`check res.headers.cookie : ${res.headers.cookie}`);
     }
 
-    const userData: {token: CertificateObject; user: any;} = {
+    this.logger.log('req.headers.authorization',req.headers.authorization);
+    console.log("req.headers.authorization",req.headers.authorization);
+
+    const userData: {token: string; user: any;} = {
       token: null,
       user: null,
     }
@@ -67,17 +82,17 @@ export class LoginController {
     this.logger.log('codeCallback start');
     this.logger.log(`codeCallback query : ${query.code}`);
     this.logger.log(`codeCallback res.headersSent : ${res.headersSent}`);
-    async (res:Response): Promise<void> => {
-      const log = res.getHeaderNames().toString();
-      this.logger.log(`codeCallback res.getHeaderNames : ${log}`)
-    };
+    // async (res:Response): Promise<void> => {
+    //   const log = res.getHeaderNames().toString();
+    //   this.logger.log(`codeCallback res.getHeaderNames : ${log}`)
+    // };
 
-    this.logger.log(`codeCallback req.headers : ${req.headers}`);
+    this.logger.log(`codeCallback req.headers.cookie : ${req.headers.cookie}`);
     this.logger.log(`codeCallback req.headers.authorization : ${req.headers.authorization}`); // find it out !
     this.logger.log(`codeCallback req.headers.Authorization_true, false : ${req.headers.Authorization !== undefined? true: false}`);
     this.logger.log(`codeCallback req.headers.cookie : ${req.headers.cookie}`);
-    this.logger.log(`codeCallback req.body : ${req.body}`);
-    this.logger.log(`codeCallback req.cookies : ${req.cookies}`)
+    // this.logger.log(`codeCallback req.body.token : ${req.body.token}`);
+    // this.logger.log(`codeCallback req.cookies.token : ${req.cookies.token}`);
     authHeader = req.headers.authorization.startsWith('Bearer') ? req.headers.authorization.split(' ')[1] : req.headers.authorization;
     if (authHeader === "null" || authHeader === "undefined" ) {
       this.logger.log('codeCallback authHeader null');
@@ -85,24 +100,29 @@ export class LoginController {
     } else {
     this.logger.log(`codeCallback authHeader : ${authHeader}`);
     userDto = await this.usersService.validateUser(authHeader);
-    
     this.logger.log(`codeCallback userDto :`);
-    console.log(userDto);
+    console.log(userDto);            
 
     // { userIdx, intra, imgUri, accessToken, email }
     intraInfo.imgUri = userDto.imgUri;
     intraInfo.accessToken = userDto.certificate.token;
     intraInfo.email = intraInfo.email;
-    // this.logger.log(`codeCallback intraInfo : ${intraInfo}`)
-    console.log("codeCallback intraInfo",intraInfo);
+    this.logger.log(`1 codeCallback intraInfo : `);
+    
+    console.log("1 codeCallback intraInfo",intraInfo);
     }
     const userInfo = await this.loginService.getUserInfo(intraInfo);
-
+    console.log("2 codeCallback userInfo",userInfo.accessToken);
     // const token = await this.loginService.issueToken(userInfo.id, userInfo.check2Auth);
     userData.user = await this.usersService.findOneUser(userInfo.id);
-    const createdCertificateDto: CreateCertificateDto = {token:userInfo.accessToken, check2Auth: false, email: intraInfo.email, userIdx: userInfo.id};
-    userData.token = await this.usersService.saveToken(createdCertificateDto);
-    this.logger.log(`check userData.token.token isExist : ${userData.token.token}`); 
+    
+    userData.token = userInfo.accessToken;
+    if (userData.token === authHeader) {
+      console.log('codeCallback userData.token === authHeader : true');
+    }
+    // const createdCertificateDto: CreateCertificateDto = {token:userInfo.accessToken, check2Auth: false, email: intraInfo.email, userIdx: userInfo.id};
+    // userData.token = await this.usersService.saveToken(createdCertificateDto);
+    this.logger.log(`check userData.token.token isExist : ${authHeader}`); 
     this.logger.log('codeCallback end accessToken', userInfo.accessToken);
     
     // this.logger.log(`res.header : \n${res.header}`); // just function
@@ -110,12 +130,17 @@ export class LoginController {
     // this.logger.log('res.headers.cookie', res.headers.cookie);
     // this.logger.log(`res.headers.authorization :  ${res.headers.authorization}`);
     // this.logger.log(`res.body : ${res.body}`); // [res.body : undefined]
-    const resp :Response =res;
-    // resp.cookie('token', userData.token.token, { httpOnly: true, path: '/' });
-    resp.setHeader('Set-Cookie', `Authentication=${userData.token.token}; `);
-    console.log(resp);
+    res.cookie('Authentication', userData.token, { httpOnly: true, path: '*'});
+    res.setHeader('Authorization', `Bearer ${userData.token}`);
     
-    return res.status(200).json({ code:userData.token.token ,message: '로그인 성공' });
+    // resp.cookie('token', userData.token.token, { httpOnly: true, path: '/' });
+    // resp.set({'code': userInfo.accessToken});
+
+    // res.set('code', userInfo.accessToken);
+    
+    console.log("success");
+    
+    return res.status(200).json(userData);
   }
 
   @Post('logout')
