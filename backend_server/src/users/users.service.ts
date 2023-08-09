@@ -18,6 +18,7 @@ import { CertificateObject } from './entity/certificate.entity';
 import { FriendList } from './entity/friendList.entity';
 import { DataSource } from 'typeorm';
 
+
 const intraApiMyInfoUri = 'https://api.intra.42.fr/v2/me';
 @Injectable()
 export class UsersService {
