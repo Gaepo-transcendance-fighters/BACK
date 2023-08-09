@@ -12,7 +12,6 @@ import { UserObject } from './users.entity';
 @Entity('certificate')
 export class CertificateObject extends BaseEntity {
   @PrimaryColumn()
-  @Unique(['userIdx'])
   userIdx: number;
 
   @Column()

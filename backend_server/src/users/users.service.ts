@@ -16,12 +16,13 @@ import { CertificateRepository } from './certificate.repository';
 import { UserObject } from './entity/users.entity';
 import { CertificateObject } from './entity/certificate.entity';
 import { FriendList } from './entity/friendList.entity';
+import { DataSource } from 'typeorm';
 
 const intraApiMyInfoUri = 'https://api.intra.42.fr/v2/me';
 @Injectable()
 export class UsersService {
   constructor(
-    private httpService: HttpService,
+    private dataSource: DataSource,
     private userObjectRepository: UserObjectRepository,
     private blockedListRepository: BlockListRepository,
     private friendListRepository: FriendListRepository,
@@ -157,53 +158,99 @@ export class UsersService {
   }
   */
   async validateUser(accessToken: string): Promise<UserObject> {
-    this.logger.log('validateUser function');
-    this.logger.log(accessToken);
+    const queryRunner = this.dataSource.createQueryRunner();
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    this.logger.log('validateUser start with token : ', accessToken);
     try {
       const response = await axios.get(intraApiMyInfoUri, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
       });
-      this.logger.log(`getIntraInfo: response.data.access_token : ${response.data.access_token}`)
+      // this.logger.log(`getIntraInfo: response.data.access_token : ${response.data.access_token}`) // undefined
+      // console.log(`getIntraInfo: response.data.access_token : ${response.data.access_token}`); // undefined
+      // console.log(`getIntraInfo: response.data.accessToken : ${response.data.accessToken}`); // undefined why? it isn't exist in here
+      console.log(`getIntraInfo: response.data.id : ${response.data.id}`);
+      const userInfo = response.data;
+      
+      // console.log(`userInfo : ${userInfo}`); // too many
+      
+      this.logger.log(`getIntraInfo: userInfo : ${userInfo.id}, ${userInfo.image.versions.small}`);
+      if (!userInfo.id) {
+        throw this.logger.error('인트라 정보 불러오기 실패했습니다.');
+      }
+      let existedUser: UserObject = await this.findOneUser(userInfo.id);
+        console.log(`existedUser, userIdx :  `,existedUser);
+        if (!existedUser) {
+          this.logger.log('No user');
+          /*
+            @PrimaryColumn()
+            userIdx: number;
 
-      const userInfo = response;
-      console.log(userInfo);
-      // 이제 userInfo를 사용하여 원하는 작업을 수행할 수 있습니다.
-      this.logger.log(`getIntraInfo: userInfo : ${userInfo.data.id}, ${userInfo.data.image.versions.small}`);
-      if (userInfo) {
-        this.logger.log(`response.data.id : ${response.data.id}`);
+            @Column()
+            token: string;
 
-        let existedUser: UserObject = await this.findOneUser(response.data.id);
-        this.logger.log(`user : ${existedUser}`)
-        if (existedUser) {
-          this.logger.log('user exist');
-          return existedUser;
-        } else {
+            @Column()
+            email: string
+
+            @Column({ default: false })
+            check2Auth: boolean;
+           */
+          const certi = await this.certificateRepository.insertCertificate(
+            
+            userInfo.id,
+            accessToken, // intraInfo에 있지
+            userInfo.email,
+            false,
+            
+          );
+          
+          console.log('certificate insert', certi);
+
           this.logger.log(`user create start`);
           const user = await this.userObjectRepository.createUser({
             userIdx: response.data.id,
             intra: response.data.login,
             nickname: response.data.login,
             imgUri: response.data.image.link,
-            certificate: response.data.accessToken,
+            certificate: certi,
             email: response.data.email,
           });
-          this.logger.log(`user create end ${user}, certi insert start`);
-          const certi = await this.certificateRepository.insertCertificate(
-            response.data.accessToken,
-            false,
-            response.data.email,
-            response.data.Id,
-          )
-          if (certi == null) {
-            this.logger.log('서버에 문제가 발생했습니다.');
+          console.log('user create end', user);
+
+          try{
+            await queryRunner.manager.save(certi);
+            await queryRunner.manager.save(user);
+            
+            await queryRunner.commitTransaction();
+          } catch (err) {
+            await queryRunner.rollbackTransaction();
+            console.log(err);
+          } finally {
+            await queryRunner.release();
           }
-          console.log('certificate insert', certi);
+          
           return user;
+        } else {
+          // 유저가 존재하는 경우
+          if (existedUser.certificate.token !== accessToken) {
+            // 존재하는 유저가 있지만 토큰이 다른 경우 -> 토큰 업데이트
+            this.logger.log('user is exist but token is different');
+
+            existedUser.certificate.token = accessToken;
+            await this.certificateRepository.update(existedUser.userIdx, existedUser.certificate);
+            return existedUser;
+          }
+          this.logger.log(` 유저가 존재하지 않은 경우 certi insert start`);
+          /*
+              token: string;
+              check2Auth: boolean;
+              email: string;
+              userIdx: number;
+           */
         }
-      }
-      return null;
 
     } catch (error) {
       // 에러 핸들링
@@ -214,15 +261,14 @@ export class UsersService {
 
   async createCertificate(
     createCertificateDto: CreateCertificateDto,
-    user: UserObject,
-    email: string,
+    
   ): Promise<CertificateObject> {
 
     return this.certificateRepository.insertCertificate(
+      createCertificateDto.userIdx,
       createCertificateDto.token,
-      true,
-      email,
-      user.userIdx,
+      createCertificateDto.email,
+      createCertificateDto.check2Auth,
     );
   }
 
