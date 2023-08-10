@@ -54,6 +54,7 @@ export class FriendListRepository extends Repository<FriendList> {
         });
         return {
           friendNicname: user.nickname,
+          friendIdx: user.userIdx,
           isOnline: user.isOnline,
         };
       }),

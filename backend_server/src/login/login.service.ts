@@ -1,7 +1,6 @@
 import { HttpException, HttpStatus, Injectable, Logger, } from '@nestjs/common';
 import axios from 'axios';
 import { HttpService } from '@nestjs/axios';
-import { lastValueFrom } from 'rxjs';
 import * as jwt from 'jsonwebtoken';
 import * as dotenv from 'dotenv';
 import { JwtPayloadDto } from 'src/auth/dto/auth.dto';
@@ -45,7 +44,7 @@ export class LoginService {
   
     try {
       const response = await axios.post(intraApiTokenUri, body);
-      console.log("trying get response from axios post : ",response)
+      // console.log("trying get response from axios post : ",response) // 이건 200 성공으로 모든 정보가 담긴 response
       // this.logger.log(`getToken: response.data : ${response.data}`) // [object Object]
       // this.logger.log(`getToken: response.data.message : ${response.data.message}`) // undefined
       this.logger.log(`getToken: response.data.access_token : ${response.data.access_token}`)
@@ -79,11 +78,11 @@ export class LoginService {
           Authorization: `Bearer ${tokens}`,
         },
       });
-      this.logger.log(`getIntraInfo: response.data.access_token : ${response.data.access_token}`);
-      this.logger.log(`getIntraInfo: Not response.data.access_token, but tokens   : ${tokens}`);
+      this.logger.log(`getIntraInfo: response.data.accessToken : ${response.data.accessToken}`);
+      this.logger.log(`getIntraInfo: Not response.data.accessToken, but tokens   : ${tokens}`);
       
       const userInfo = response.data;
-      console.log(`getIntraInfo: userInfo : ${userInfo}`);
+      // console.log(`getIntraInfo: userInfo : `,userInfo); // too many
       // console.log('userInfo : Logging :',userInfo);
       // 이제 userInfo를 사용하여 원하는 작업을 수행할 수 있습니다.
       this.logger.log(`getIntraInfo: userInfo : ${userInfo.id}, ${userInfo.image.versions.small}`);
@@ -141,7 +140,13 @@ export class LoginService {
     this.logger.log(`getUserInfo : ${userIdx}, ${intra}, ${imgUri}, ${accessToken}, ${email}`);
     let user: UserObject | CreateUsersDto = await this.usersService.findOneUser(userIdx);
     if (user === null || user === undefined) {
+      /*
+        token: string;
+        check2Auth: boolean;
+        email: string;
+        userIdx: number; 
       
+       */
       const savedtoken = await this.usersService.saveToken({
         token: accessToken,
         check2Auth: false,

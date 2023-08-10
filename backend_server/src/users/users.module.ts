@@ -11,6 +11,7 @@ import { HttpModule } from '@nestjs/axios';
 import { AuthModule } from 'src/auth/auth.module';
 import { UsersGateway } from './users.gateway';
 
+// @Global()
 @Module({
   imports: [
     TypeOrmExModule.forCustomRepository([
@@ -25,6 +26,6 @@ import { UsersGateway } from './users.gateway';
   ],
   controllers: [UsersController],
   providers: [UsersService, UsersGateway],
-  exports: [UsersService],
+  exports: [UsersService, TypeOrmExModule],
 })
 export class UsersModule {}

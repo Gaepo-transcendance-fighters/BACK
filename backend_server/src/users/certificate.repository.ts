@@ -5,20 +5,22 @@ import { CertificateObject } from './entity/certificate.entity';
 @CustomRepository(CertificateObject)
 export class CertificateRepository extends Repository<CertificateObject> {
   async insertCertificate(
-    token: string,
-    check2Auth: boolean,
-    email: string,
     userIdx: number,
+    token: string,
+    email: string,
+    check2Auth: boolean,
   ){
 
     const certificate = this.create({
       token: token,
+      email: email,
       userIdx: userIdx,
       check2Auth: check2Auth,
     });
+    console.log( 'cert Repo certificate : ', certificate)
 
     const auth = await this.save(certificate);
-
+    console.log( 'cert Repo auth : ', auth)
     return auth;
   }
 }
