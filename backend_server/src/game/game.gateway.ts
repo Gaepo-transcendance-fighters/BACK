@@ -10,10 +10,6 @@ import {
 } from '@nestjs/websockets';
 import { Socket, Server } from 'socket.io';
 import { GameService } from './game.service';
-<<<<<<< HEAD
-import { ErrorMsgDto } from './dto/errorMessage.dto';
-import { Logger } from '@nestjs/common';
-=======
 
 import { ReturnMsgDto } from './dto/errorMessage.dto';
 import { Logger, UseFilters } from '@nestjs/common';
@@ -21,7 +17,6 @@ import { WsExceptionFilter } from 'src/ws.exception.filter';
 import { UsersService } from 'src/users/users.service';
 import { GameOnlineMember } from './class/game.online.member/game.online.member';
 import { GameOptionDto } from './dto/gameOption.dto';
->>>>>>> dev
 
 @WebSocketGateway({
   namespace: 'game',
