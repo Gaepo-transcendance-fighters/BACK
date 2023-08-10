@@ -4,10 +4,10 @@ export interface IntraInfoDto {
     userIdx : number;
     imgUri: string;
   }
-export interface JwtPayloadDto {
+export class JwtPayloadDto {
   id: number;
-  check2Auth: boolean;
-  accessToken: string; // 임시
+  email: string;
+  // accessToken: string; // 임시
 };
 
 export class CreateCertificateDto {

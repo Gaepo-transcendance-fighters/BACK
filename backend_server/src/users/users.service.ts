@@ -6,10 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { BlockListRepository } from './blockList.repository';
 import { FriendListRepository } from './friendList.repository';
 import { InsertFriendDto } from './dto/insert-friend.dto';
-import { HttpService } from '@nestjs/axios';
 import axios from 'axios';
-import { firstValueFrom, lastValueFrom } from 'rxjs';
-import { response } from 'express';
 import { CreateCertificateDto, IntraInfoDto, JwtPayloadDto } from 'src/auth/dto/auth.dto';
 import { Socket } from 'socket.io';
 import { CertificateRepository } from './certificate.repository';
@@ -183,7 +180,7 @@ export class UsersService {
         throw this.logger.error('인트라 정보 불러오기 실패했습니다.');
       }
       let existedUser: UserObject = await this.findOneUser(userInfo.id);
-        console.log(`existedUser, userIdx :  `,existedUser);
+        console.log(`existedUser :  `,existedUser);
         if (!existedUser) {
           this.logger.log('No user');
           /*
@@ -198,6 +195,14 @@ export class UsersService {
 
             @Column({ default: false })
             check2Auth: boolean;
+           */
+
+          this.logger.log(` 유저가 존재하지 않은 경우 certi insert start`);
+          /*
+              token: string;
+              check2Auth: boolean;
+              email: string;
+              userIdx: number;
            */
           const certi = await this.certificateRepository.insertCertificate(
             
@@ -236,21 +241,18 @@ export class UsersService {
           return user;
         } else {
           // 유저가 존재하는 경우
-          if (existedUser.certificate.token !== accessToken) {
+          let certi = await this.certificateRepository.findOne({ where: { userIdx: existedUser.userIdx } });
+          if (certi.token === accessToken) {
+            return existedUser;
+          } else {
             // 존재하는 유저가 있지만 토큰이 다른 경우 -> 토큰 업데이트
-            this.logger.log('user is exist but token is different');
-
-            existedUser.certificate.token = accessToken;
-            await this.certificateRepository.update(existedUser.userIdx, existedUser.certificate);
+            this.logger.log('user is exist but token is different renew token');
+            certi.token = accessToken;
+            await this.certificateRepository.update(certi.userIdx, certi);
+            existedUser.certificate = certi;
             return existedUser;
           }
-          this.logger.log(` 유저가 존재하지 않은 경우 certi insert start`);
-          /*
-              token: string;
-              check2Auth: boolean;
-              email: string;
-              userIdx: number;
-           */
+
         }
 
     } catch (error) {

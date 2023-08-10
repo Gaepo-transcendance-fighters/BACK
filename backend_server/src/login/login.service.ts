@@ -17,7 +17,6 @@ dotenv.config({
 
 export const redirectUri = process.env.REDIRECT_URI;
 export const apiUid = process.env.CLIENT_ID;
-const apiSecret = process.env.CLIENT_SECRET;
 const jwtSecret = process.env.JWT_SECRET;
 export const intraApiTokenUri = 'https://api.intra.42.fr/oauth/token';
 const intraApiMyInfoUri = 'https://api.intra.42.fr/v2/me';
@@ -25,15 +24,14 @@ const intraApiMyInfoUri = 'https://api.intra.42.fr/v2/me';
 @Injectable()
 export class LoginService {
   constructor(
-    private readonly httpService: HttpService,
     private readonly usersService: UsersService,
   ) {}
   private logger: Logger = new Logger('LoginService');
 
 
 
-  async getToken(code: string): Promise<any> {
-    this.logger.log(`getToken : code= ${code}`);
+  async getAccessToken(code: string): Promise<any> {
+    this.logger.log(`getAccessToken : code= ${code}`);
     const body = {
       grant_type: 'authorization_code',
       client_id: process.env.CLIENT_ID,
@@ -47,7 +45,7 @@ export class LoginService {
       // console.log("trying get response from axios post : ",response) // 이건 200 성공으로 모든 정보가 담긴 response
       // this.logger.log(`getToken: response.data : ${response.data}`) // [object Object]
       // this.logger.log(`getToken: response.data.message : ${response.data.message}`) // undefined
-      this.logger.log(`getToken: response.data.access_token : ${response.data.access_token}`)
+      this.logger.log(`getAccessToken: response.data.access_token : ${response.data.access_token}`)
       return response.data.access_token;
     } catch (error) {
       // Handle error
@@ -70,7 +68,7 @@ export class LoginService {
     // const tokens = await lastValueFrom(
     //   this.httpService.post(intraApiTokenUri, params)
     // );
-    const tokens = await this.getToken(code);
+    const tokens = await this.getAccessToken(code);
 
     try {
       const response = await axios.get(intraApiMyInfoUri, {
@@ -78,8 +76,8 @@ export class LoginService {
           Authorization: `Bearer ${tokens}`,
         },
       });
-      this.logger.log(`getIntraInfo: response.data.accessToken : ${response.data.accessToken}`);
-      this.logger.log(`getIntraInfo: Not response.data.accessToken, but tokens   : ${tokens}`);
+      this.logger.log(`getIntraInfo: response.data.access_token : ${response.data.access_token}`);
+      this.logger.log(`getIntraInfo: but tokens : ${tokens}`);
       
       const userInfo = response.data;
       // console.log(`getIntraInfo: userInfo : `,userInfo); // too many
@@ -166,12 +164,13 @@ export class LoginService {
       user = await this.usersService.createUser(newUser);
       this.logger.log('createUser called');
       
+      
     }
 
     return {
-      id: user.userIdx,
-      check2Auth: false,
-      accessToken: accessToken,
+      id: userIdx,
+      email: email
+      // accessToken: accessToken,
     };
   }
 }

@@ -20,6 +20,7 @@ import { UsersService } from 'src/users/users.service';
 import { plainToClass } from 'class-transformer';
 import { CertificateObject } from 'src/users/entity/certificate.entity';
 import { UserObject } from 'src/users/entity/users.entity';
+import { JwtPayloadDto } from 'src/auth/dto/auth.dto';
 
 
 @Controller()
@@ -50,12 +51,12 @@ export class LoginController {
 
   }
   @Post('login/auth')
-  async codeCallback(@Headers('authorization') authHeader: any, @Req() req:Request, @Res() res: Response, @Body() query: any) {
+  async codeCallback(@Req() req:Request, @Res() res: Response, @Body() query: any) {
     
     this.logger.log(`codeCallback code : ${query.code}`);
     // authHeader가 존재, 즉 로그인이 되어 있는 사람이라면 로그인을 넘어가고 정보를 가져오는 걸로
     // 현재는 access_token이 존재하는지만 확인하고 있음
-    authHeader = authHeader.startsWith('Bearer') ? authHeader.split(' ')[1] : req.headers.authorization;
+    const authHeader = req.headers.authorization.startsWith('Bearer') ? req.headers.authorization.split(' ')[1] : req.headers.authorization;
     console.log('codeCallback token : ', authHeader);
     if (!authHeader) {
       this.logger.log('codeCallback : authHeader is undefined or null');
@@ -77,12 +78,14 @@ export class LoginController {
     // 요청에 대한 메시지 객체
     interface Data {
       token: string;
+      jwt: string;
       user: {
-        userIdx: number,
-        intra: string,
-        imgUri: string,
-        accessToken: string,
-        email: string };
+        userIdx: number;
+        intra: string;
+        imgUri: string;
+        accessToken: string;
+        email: string;
+      };
     }
     
 
@@ -104,22 +107,20 @@ export class LoginController {
     // authHeader = req.headers.authorization.startsWith('Bearer') ? req.headers.authorization.split(' ')[1] : authHeader; // 무의미
     
     // token 갱신
-    const token = intraInfo.accessToken;
+    const accesstoken = intraInfo.accessToken;
     
-    this.logger.log(`codeCallback token : ${token}`);
+    this.logger.log(`codeCallback token : ${accesstoken}`);
 
     
     // 이걸로 아래의 것들을 가져온다
-    userDto = await this.usersService.validateUser(token);
+    userDto = await this.usersService.validateUser(accesstoken);
     console.log(`codeCallback userDto : `,userDto);
     // { userIdx, intra, imgUri, accessToken, email }
     let userData : Data;
-    let user = plainToClass(IntraInfoDto, intraInfo );
-    userData = {token, user};
+    let user = plainToClass(IntraInfoDto, intraInfo);
     
     
     
-    console.log(`codeCallback userData : ` ,userData.token, userData.user);
     // console.log(userDto);
     // console.log(userDto.imgUri);      
     // intraInfo = plainToClass(IntraInfoDto, userDto);
@@ -140,8 +141,16 @@ export class LoginController {
     // this.logger.log('res.headers.cookie', res.headers.cookie);
     // this.logger.log(`res.headers.authorization :  ${res.headers.authorization}`);
     // this.logger.log(`res.body : ${res.body}`); // [res.body : undefined]
-    res.cookie('Authentication', userData.token, { httpOnly: true, path: '*'});
-    res.setHeader('Authorization', `Bearer ${userData.token}`);
+    const payload :JwtPayloadDto = {id : user.userIdx, email: user.email};
+    console.log("login controller : payload ",payload);
+    const jwt = this.loginService.issueToken(payload);
+    res.cookie('token', jwt, { httpOnly: true, path: '*'});
+    console.log(`codeCallback jwt : `, jwt);
+
+    userData = {token : accesstoken, jwt : (await jwt).toString(), user};
+
+    console.log(`codeCallback userData : ` ,userData.token, userData.user);
+    // res.setHeader('Authorization', `Bearer ${userData.token}`);
     
     // resp.cookie('token', userData.token.token, { httpOnly: true, path: '/' });
     // resp.set({'code': userInfo.accessToken});
