@@ -1,4 +1,4 @@
-import { Logger, Module, OnModuleInit } from '@nestjs/common';
+import { Logger, Module, OnModuleInit, forwardRef } from '@nestjs/common';
 import { ChatService } from './chat.service';
 import { ChatGateway } from './chat.gateway';
 import { Chat } from './class/chat.class';
@@ -7,12 +7,14 @@ import { TypeOrmExModule } from '../typeorm-ex.module';
 import { InMemoryUsers } from 'src/users/users.provider';
 import { UsersService } from 'src/users/users.service';
 import { Channel } from './class/channel.class';
-import { Mode } from '../entity/chat.entity';
 import { SharedModule } from 'src/shared/shared.module';
+import { Mode } from './entity/chat.entity';
+import { UsersModule } from 'src/users/users.module';
 
 @Module({
   // TODO: Member 와 관련된 것을 추가해야함
   imports: [
+    forwardRef(() => UsersModule),
     TypeOrmExModule.forCustomRepository([
       DMChannelRepository,
       DirectMessageRepository,

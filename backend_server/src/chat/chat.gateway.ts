@@ -15,15 +15,16 @@ import { Socket, Server } from 'socket.io';
 import { Channel } from './class/channel.class';
 import { Chat, MessageInfo } from './class/chat.class';
 import { UsersService } from 'src/users/users.service';
-import { DMChannel, Mode } from '../entity/chat.entity';
+import { chatCreateRoomReqDto } from './dto/chat.dto';
 import { InMemoryUsers } from 'src/users/users.provider';
-import { UserObject } from 'src/entity/users.entity';
 import { SendDMDto } from './dto/send-dm.dto';
+import { UserObject } from 'src/users/entity/users.entity';
+import { DMChannel } from './entity/chat.entity';
 
 @WebSocketGateway({
   namespace: 'chat',
   cors: {
-    origin: ['http://localhost:3001'],
+    origin: ['http://localhost:3000'],
   },
 })
 export class ChatGateway

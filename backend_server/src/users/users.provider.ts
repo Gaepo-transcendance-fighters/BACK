@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { UserObject } from 'src/entity/users.entity';
+import { UserObject } from './entity/users.entity';
 
 @Injectable()
 export class InMemoryUsers {

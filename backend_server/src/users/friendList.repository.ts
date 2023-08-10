@@ -1,8 +1,8 @@
 import { Repository } from 'typeorm'; // EntityRepository 가 deprecated 되어 직접 호출함
 import { CustomRepository } from 'src/typeorm-ex.decorator';
-import { InsertFriendDto } from './dto/insert-friend.dto';
-import { FriendList } from 'src/entity/friendList.entity';
-import { UserObject } from 'src/entity/users.entity';
+import { InsertFriendDto, InsertFriendResDto } from './dto/insert-friend.dto';
+import { FriendList } from './entity/friendList.entity';
+import { UserObject } from './entity/users.entity';
 import { UserObjectRepository } from './users.repository';
 
 @CustomRepository(FriendList)
@@ -11,7 +11,15 @@ export class FriendListRepository extends Repository<FriendList> {
     insertFriendDto: InsertFriendDto,
     user: UserObject,
     userList: UserObjectRepository,
-  ): Promise<string> {
+  ): Promise<FriendList[]> {
+
+    /*
+      export class FriendDto {
+        frindNickname : string;
+        friendIdx : number;
+        isOnline : boolean;
+      } 
+    */
     const { targetNickname } = insertFriendDto;
     const friend = await userList.findOne({
       where: { nickname: targetNickname },
@@ -26,9 +34,9 @@ export class FriendListRepository extends Repository<FriendList> {
       friendNickname: targetNickname,
     });
 
-    await this.save(target);
+    await this.save(target); 
 
-    return friend.nickname;
+    return this.findBy({userIdx : user.userIdx});
   }
 
   async getFriendList(
