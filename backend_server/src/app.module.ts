@@ -11,6 +11,7 @@ import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { LoginModule } from './login/login.module';
 import { InMemoryUsers } from './users/users.provider';
+import { SharedModule } from './shared/shared.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { InMemoryUsers } from './users/users.provider';
     GameModule,
     AuthModule,
     LoginModule,
+    SharedModule,
   ],
   controllers: [AppController],
   providers: [AppService, InMemoryUsers],

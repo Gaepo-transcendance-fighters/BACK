@@ -1,7 +1,6 @@
 import { HttpException, HttpStatus, Injectable, Logger, } from '@nestjs/common';
 import axios from 'axios';
 import { HttpService } from '@nestjs/axios';
-import { lastValueFrom } from 'rxjs';
 import * as jwt from 'jsonwebtoken';
 import * as dotenv from 'dotenv';
 import { JwtPayloadDto } from 'src/auth/dto/auth.dto';

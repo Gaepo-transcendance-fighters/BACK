@@ -2,12 +2,10 @@ import {
   Entity,
   BaseEntity,
   Column,
-  PrimaryGeneratedColumn,
   OneToOne,
   PrimaryColumn,
   Unique,
 } from 'typeorm';
-import { UserObject } from './users.entity';
 
 @Entity('certificate')
 export class CertificateObject extends BaseEntity {
@@ -18,8 +16,9 @@ export class CertificateObject extends BaseEntity {
   token: string;
 
   @Column()
-  email: string
+  email: string;
 
   @Column({ default: false })
   check2Auth: boolean;
+
 }

@@ -18,7 +18,7 @@ async function bootstrap() {
   };
   app.enableCors(corsOptions);
   app.useGlobalPipes(new ValidationPipe());
-  
+    console.log(server);
   await app.listen(server.port);
   console.log(`listening on port, ${server.port}`);
 
