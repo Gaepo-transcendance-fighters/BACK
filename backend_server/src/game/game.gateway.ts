@@ -190,7 +190,7 @@ export class GameGateway
     if (ret === null) client.disconnect(true);
     else if (
       ret === true &&
-      (target.gameObj.gamePhase = GamePhase.SET_NEW_GAME)
+      (target.gameObj.gamePhase === GamePhase.SET_NEW_GAME)
     ) {
       const roomId = this.gameService.findGameRoomIdByUserId(userIdx);
       setTimeout(() => {
@@ -199,7 +199,7 @@ export class GameGateway
       this.gameService.uncheckReady(userIdx);
     } else if (
       ret === true &&
-      (target.gameObj.gamePhase = GamePhase.MATCH_END)
+      (target.gameObj.gamePhase === GamePhase.MATCH_END)
     ) {
       this.gameService.uncheckReady(userIdx);
       const roomId = target.deleteRoom();
@@ -214,7 +214,7 @@ export class GameGateway
 
   @SubscribeMessage('game_force_quit')
   getQuitSignal(@MessageBody() data: GameBasicAnswerDto) {
-    // this.gameService.forceQuitMatch(data.userIdx, this.server);
+    this.gameService.forceQuitMatch(data.userIdx, this.server);
   }
 
   @SubscribeMessage('game_queue_quit')
