@@ -1292,6 +1292,7 @@ export class ChatGateway
         this.chatService.goToLobby(targetSocket, targetCurChannel, targetUser);
       }
     }
+    console.log(`anserCard : ${answerCard}`);
     inviteSocket.emit('chat_receive_answer', answerCard);
     targetSocket.emit('chat_receive_answer', answerCard);
     return new ReturnMsgDto(200, 'Ok!');
