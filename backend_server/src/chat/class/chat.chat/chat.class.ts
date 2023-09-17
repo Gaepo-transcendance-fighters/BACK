@@ -47,6 +47,18 @@ export class Chat {
     }
   }
 
+  getMyCurrentChannel(userIdx: number): Channel {
+    if (this.protectedChannels.length === 0) return;
+    for (const channel of this.protectedChannels) {
+      for (const member of channel.getMember) {
+        if (member.userIdx === userIdx) {
+          return channel;
+        }
+      }
+    }
+    return null;
+  }
+
   get getSocketList(): SocketObject[] {
     return this.socketList;
   }

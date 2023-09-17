@@ -1275,6 +1275,8 @@ export class ChatGateway
     const targetSocket = targetTuple[1];
     const inviteUser: UserObject = inviteTuple[0];
     const targetUser: UserObject = targetTuple[0];
+    const inviterCurChannel: Channel = this.chat.getMyCurrentChannel(answer.inviteUserIdx);
+    const targetCurChannel: Channel = this.chat.getMyCurrentChannel(answer.targetUserIdx);
     const answerCard = new GameInvitationAnswerPassDto(
       inviteUser,
       targetUser,
@@ -1283,6 +1285,12 @@ export class ChatGateway
     if (answer.answer === true) {
       this.usersService.setIsOnline(targetUser, OnlineStatus.ONGAME);
       this.usersService.setIsOnline(inviteUser, OnlineStatus.ONGAME);
+      if (inviterCurChannel instanceof Channel) {
+        this.chatService.goToLobby(inviteSocket, inviterCurChannel, inviteUser);
+      }
+      if (targetCurChannel instanceof Channel) {
+        this.chatService.goToLobby(targetSocket, targetCurChannel, targetUser);
+      }
     }
     inviteSocket.emit('chat_receive_answer', answerCard);
     targetSocket.emit('chat_receive_answer', answerCard);
