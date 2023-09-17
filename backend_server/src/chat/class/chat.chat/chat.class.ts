@@ -50,9 +50,6 @@ export class Chat {
   getMyCurrentChannel(userIdx: number): Channel {
     if (this.protectedChannels.length === 0) return;
     for (const channel of this.protectedChannels) {
-      if (channel.getOwner.userIdx === userIdx) {
-        return channel;
-      }
       for (const member of channel.getMember) {
         if (member.userIdx === userIdx) {
           return channel;
