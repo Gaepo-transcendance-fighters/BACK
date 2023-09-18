@@ -40,10 +40,16 @@ export class Chat {
   }
 
   getAllInfo() {
-    return {
-      protectedChannels: this.getProtectedChannels,
-      
-    };
+    const result = this.getProtectedChannels.map((channel) => {
+      const member = channel.getMember.map((member) => {
+        return member.nickname;
+      });
+
+      return {
+        channelIdx: channel.getChannelIdx,
+        member: member,
+      };
+    });
   }
   getProtectedChannel(channelIdx: number): Channel {
     for (const channel of this.protectedChannels) {
