@@ -1286,12 +1286,7 @@ export class ChatGateway
       this.usersService.setIsOnline(targetUser, OnlineStatus.ONGAME);
       this.usersService.setIsOnline(inviteUser, OnlineStatus.ONGAME);
       console.log("invite done");
-      if (inviterCurChannel instanceof Channel) {
-        this.chatService.goToLobby(inviteSocket, inviterCurChannel, inviteUser);
-      }
-      if (targetCurChannel instanceof Channel) {
-        this.chatService.goToLobby(targetSocket, targetCurChannel, targetUser);
-      }
+      
     }
     console.log(`anserCard : ${answerCard}`);
     setTimeout(() => {

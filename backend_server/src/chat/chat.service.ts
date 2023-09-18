@@ -29,6 +29,7 @@ import { Message } from './class/chat.message/message.class';
 import { InjectRepository } from '@nestjs/typeorm';
 import { LoggerWithRes } from 'src/shared/class/shared.response.msg/shared.response.msg';
 import { HashedChannelRepository } from './chat.repository';
+import { channel } from 'diagnostics_channel';
 
 @Injectable()
 export class ChatService {
@@ -573,6 +574,11 @@ export class ChatService {
 
   /******************* Funcions about Exit Room *******************/
 
+  getInMemoryAll() {
+    
+    return this.chat.getAllInfo();
+  }
+  
   goToLobby(client: Socket, channel: Channel, user: UserObject) {
     console.log('chat Service : goToLobby');
     const isOwner: boolean = channel.getOwner.userIdx === user.userIdx;
@@ -742,4 +748,5 @@ export class ChatService {
     );
     return messageInfo;
   }
+  
 }
