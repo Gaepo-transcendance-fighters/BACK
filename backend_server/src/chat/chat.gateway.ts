@@ -1255,6 +1255,7 @@ export class ChatGateway
         myObject.nickname,
       );
       console.log(invitaionCard);
+      targetSocket.emit('chat_invite_answer', invitaionCard);
     } else {
       return new ReturnMsgDto(400, 'Bad Request, target user is offline');
     }
