@@ -15,12 +15,4 @@ export class ChatController {
     console.log('프론트에서받은 마지막 메세지데이트', page);
     return this.chatService.getChatMessagesByInfinity(channelIdx, page);
   }
-
-  @Get('inMemory')
-  getInMemory(@Res() res): any {
-    console.log('얘 버겁니?');
-    const result = this.chatService.getInMemoryAll();
-
-    return res.status(HttpStatus.OK).json(result);
-  }
 }

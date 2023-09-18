@@ -29,7 +29,6 @@ import { Message } from './class/chat.message/message.class';
 import { InjectRepository } from '@nestjs/typeorm';
 import { LoggerWithRes } from 'src/shared/class/shared.response.msg/shared.response.msg';
 import { HashedChannelRepository } from './chat.repository';
-import { channel } from 'diagnostics_channel';
 
 @Injectable()
 export class ChatService {
